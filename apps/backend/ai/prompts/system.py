@@ -24,7 +24,7 @@ LIMITACIONES DE EXTRACCIÓN (menciónalas en tu análisis si son relevantes):
 
 OUTPUT_INSTRUCTIONS = {
     "word": """
-Estructura tu respuesta con este formato Markdown:
+Estructura tu respuesta con este formato Markdown exacto:
 ## Resumen Ejecutivo
 ## Métricas Clave
 (tabla Markdown con los KPIs más importantes)
@@ -32,16 +32,62 @@ Estructura tu respuesta con este formato Markdown:
 ## Recomendaciones
 """,
     "pptx": """
-Genera el contenido para una presentación. Separa cada slide con "---SLIDE---".
-Usa este formato por slide:
+Genera el contenido para una presentación. Separa CADA slide con la línea exacta "---SLIDE---" (sin comillas, sin espacios extra).
+Usa EXACTAMENTE este formato por slide:
 TIPO: portada|agenda|contenido|cierre
 TITULO: [título del slide]
-BULLETS:
+- [bullet con dato concreto]
 - [bullet con dato concreto]
 Máximo 5 bullets por slide, 15 palabras por bullet, 12 slides en total.
+
+Ejemplo de formato correcto:
+TIPO: portada
+TITULO: Análisis Ejecutivo
+- Resumen de resultados
+---SLIDE---
+TIPO: contenido
+TITULO: Hallazgos Principales
+- Primer hallazgo relevante
+- Segundo hallazgo relevante
+---SLIDE---
+TIPO: cierre
+TITULO: Recomendaciones
+- Acción 1
+- Acción 2
+""",
+    "excel": """
+Genera tablas de datos estructuradas para Excel. Separa CADA tabla con la línea exacta "---TABLE---".
+Usa EXACTAMENTE este formato por tabla:
+TITULO: [nombre de la hoja]
+GRAFICO: si|no
+ENCABEZADOS: Columna1, Columna2, Columna3
+Valor1, Valor2, Valor3
+Valor4, Valor5, Valor6
+
+Reglas:
+- Extrae TODOS los datos numéricos y métricas del documento en tablas.
+- Si el usuario pide gráficos, pon GRAFICO: si.
+- Usa comas como separador de columnas.
+- Los números NO deben llevar puntos de miles ni símbolos de moneda (solo dígitos).
+- Genera una tabla por cada categoría o tema relevante.
+- Mínimo 1 tabla, máximo 8 tablas.
 """,
     "both": """
-Genera primero el análisis completo en formato de informe (## Resumen Ejecutivo, etc.)
-y después, separado por "===SLIDES===", el contenido de la presentación en formato slide.
+Genera ÚNICAMENTE el análisis en formato Markdown (Word).
+NO incluyas slides ni tablas Excel en esta respuesta.
+Formato:
+## Resumen Ejecutivo
+## Métricas Clave
+## Hallazgos Principales
+## Recomendaciones
+""",
+    "all": """
+Genera ÚNICAMENTE el análisis en formato Markdown (Word).
+NO incluyas slides ni tablas Excel en esta respuesta.
+Formato:
+## Resumen Ejecutivo
+## Métricas Clave
+## Hallazgos Principales
+## Recomendaciones
 """,
 }

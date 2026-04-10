@@ -1,10 +1,13 @@
-import { ipcMain, BrowserWindow } from 'electron'
-import type { AnalyzeRequest } from '@excel-analyzer/shared-types'
+import { ipcMain, BrowserWindow } from 'electron';
+import { request as httpRequest } from 'http';
+import type { AnalyzeRequest } from '@excel-analyzer/shared-types';
 
-export function registerAnalysisHandlers(
-  backendPort: number,
-  mainWindow: BrowserWindow | null
-): void {
+// Obtiene la ventana principal en el momento de enviar (evita capturar null en el registro)
+function getMainWindow(): BrowserWindow | null {
+  return BrowserWindow.getAllWindows()[0] ?? null;
+}
+
+export function registerAnalysisHandlers(backendPort: number): void {
   ipcMain.handle('analysis:start', async (_, request: AnalyzeRequest) => {
     const res = await fetch(`http://127.0.0.1:${backendPort}/analysis/start`, {
       method: 'POST',
@@ -13,34 +16,83 @@ export function registerAnalysisHandlers(
         file_paths: request.filePaths,
         user_prompt: request.userPrompt,
         output_format: request.outputFormat,
+        pptx_template_path: request.pptxTemplatePath ?? null,
       }),
-    })
+    });
 
-    const data = await res.json()
-    const sessionId: string = data.session_id
-
-    // Suscribir al SSE del backend y reenviar eventos al renderer via IPC
-    const eventSource = new EventSource(
-      `http://127.0.0.1:${backendPort}/analysis/progress/${sessionId}`
-    )
-
-    eventSource.onmessage = (event) => {
-      const parsed = JSON.parse(event.data)
-      mainWindow?.webContents.send('analysis:progress', parsed)
-      if (parsed.stage === 'done' || parsed.stage === 'error') {
-        eventSource.close()
-      }
+    if (!res.ok) {
+      const err = await res
+        .json()
+        .catch(() => ({ detail: 'Error desconocido' }));
+      throw new Error(err.detail ?? 'Error al iniciar el análisis');
     }
 
-    eventSource.onerror = () => {
-      eventSource.close()
-    }
+    const data = await res.json();
+    const sessionId: string = data.session_id;
 
-    return { sessionId }
-  })
+    return { sessionId };
+  });
+
+  // Handler separado: el renderer llama esto DESPUÉS de registrar onProgress
+  // Esto evita la race condition donde los eventos llegan antes de que el listener esté listo
+  ipcMain.handle('analysis:subscribe', (_, sessionId: string) => {
+    function consumeSSE() {
+      const sseReq = httpRequest(
+        {
+          host: '127.0.0.1',
+          port: backendPort,
+          path: `/analysis/progress/${sessionId}`,
+        },
+        (sseRes) => {
+          let buffer = '';
+          sseRes.on('data', (chunk: Buffer) => {
+            buffer += chunk.toString();
+            const parts = buffer.split(/\n\n/);
+            buffer = parts.pop() ?? '';
+            for (const part of parts) {
+              const dataLine = part
+                .split('\n')
+                .find((l) => l.startsWith('data:'));
+              if (!dataLine) continue;
+              try {
+                const parsed = JSON.parse(dataLine.slice(5).trim());
+                getMainWindow()?.webContents.send('analysis:progress', parsed);
+                if (parsed.stage === 'done' || parsed.stage === 'error') {
+                  sseReq.destroy();
+                }
+              } catch {
+                // línea malformada, ignorar
+              }
+            }
+          });
+          sseRes.on('error', () => sseReq.destroy());
+        },
+      );
+      sseReq.on('error', () => {
+        /* conexión cerrada */
+      });
+      sseReq.end();
+    }
+    consumeSSE();
+  });
 
   ipcMain.handle('analysis:result', async (_, sessionId: string) => {
-    const res = await fetch(`http://127.0.0.1:${backendPort}/analysis/result/${sessionId}`)
-    return res.json()
-  })
+    const res = await fetch(
+      `http://127.0.0.1:${backendPort}/analysis/result/${sessionId}`,
+    );
+    const data = await res.json();
+    // El backend devuelve snake_case; convertir a camelCase para el frontend
+    return {
+      sessionId: data.session_id,
+      analysisText: data.analysis_text,
+      outputFiles: (data.output_files ?? []).map(
+        (f: Record<string, string>) => ({
+          type: f.type,
+          fileName: f.file_name,
+          sessionId: f.session_id,
+        }),
+      ),
+      warnings: data.warnings ?? [],
+    };
+  });
 }

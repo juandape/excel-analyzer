@@ -55,3 +55,4 @@ htmlcov/
 coverage.xml
 apps/desktop/test-results/
 apps/desktop/playwright-report/
+.github

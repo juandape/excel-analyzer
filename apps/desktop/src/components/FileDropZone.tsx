@@ -1,7 +1,6 @@
 /** Zona de drag & drop para cargar archivos. */
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
-// Electron extiende File con .path (ruta absoluta en disco)
 interface ElectronFile extends File {
   path: string;
 }
@@ -17,7 +16,18 @@ const ALLOWED = [
   '.jpeg',
   '.webp',
 ];
-const MAX_MB = 100;
+
+const EXT_ICON: Record<string, string> = {
+  xlsx: '📊',
+  xls: '📊',
+  csv: '📊',
+  docx: '📄',
+  pdf: '📕',
+  png: '🖼',
+  jpg: '🖼',
+  jpeg: '🖼',
+  webp: '🖼',
+};
 
 interface Props {
   files: string[];
@@ -26,73 +36,113 @@ interface Props {
 
 export function FileDropZone({ files, onFilesChange }: Props) {
   const [dragging, setDragging] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function openNativeDialog() {
+    const paths = await window.electron.selectFiles();
+    if (paths.length > 0) addFiles(paths);
+  }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragging(false);
-    const paths = Array.from(e.dataTransfer.files).map(
-      (f) => (f as ElectronFile).path,
-    );
-    addFiles(paths);
-  }
-
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const paths = Array.from(e.target.files ?? []).map(
-      (f) => (f as ElectronFile).path,
-    );
-    addFiles(paths);
+    const paths = Array.from(e.dataTransfer.files)
+      .map((f) => (f as ElectronFile).path)
+      .filter(Boolean);
+    if (paths.length > 0) addFiles(paths);
   }
 
   function addFiles(newPaths: string[]) {
-    const valid = newPaths.filter((p) => {
-      const ext = p.substring(p.lastIndexOf('.')).toLowerCase();
-      return ALLOWED.includes(ext);
-    });
-    const unique = [...new Set([...files, ...valid])];
-    onFilesChange(unique);
+    const valid = newPaths.filter((p) =>
+      ALLOWED.includes(p.substring(p.lastIndexOf('.')).toLowerCase()),
+    );
+    onFilesChange([...new Set([...files, ...valid])]);
   }
 
-  function removeFile(filePath: string) {
-    onFilesChange(files.filter((f) => f !== filePath));
+  function removeFile(fp: string) {
+    onFilesChange(files.filter((f) => f !== fp));
   }
-
-  function getFileName(filePath: string) {
-    return filePath.split(/[\\/]/).pop() ?? filePath;
+  function getFileName(fp: string) {
+    return fp.split(/[\\/]/).pop() ?? fp;
+  }
+  function getExt(fp: string) {
+    return fp.split('.').pop()?.toLowerCase() ?? '';
   }
 
   return (
     <div>
-      {/* Lista de archivos cargados */}
       {files.length > 0 && (
-        <div className='space-y-2 mb-3'>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            marginBottom: 12,
+          }}
+        >
           {files.map((f) => (
             <div
               key={f}
-              className='flex items-center justify-between bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm'
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                background: '#FFFFFF',
+                border: '1.5px solid #E8DDD5',
+                borderRadius: 10,
+                padding: '10px 14px',
+              }}
             >
-              <span className='font-mono text-xs text-slate-600 truncate'>
+              <span style={{ fontSize: 18 }}>
+                {EXT_ICON[getExt(f)] ?? '📎'}
+              </span>
+              <span
+                style={{
+                  flex: 1,
+                  fontSize: 13,
+                  color: '#4A3728',
+                  fontFamily: 'monospace',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {getFileName(f)}
               </span>
               <button
                 onClick={() => removeFile(f)}
-                className='text-slate-400 hover:text-red-500 ml-3 flex-shrink-0 transition-colors'
-                aria-label={`Eliminar ${getFileName(f)}`}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#C4A899',
+                  fontSize: 16,
+                  lineHeight: 1,
+                  padding: 0,
+                  flexShrink: 0,
+                }}
               >
                 ✕
               </button>
             </div>
           ))}
           <button
-            onClick={() => inputRef.current?.click()}
-            className='text-xs text-accent hover:underline'
+            onClick={openNativeDialog}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#8B6145',
+              fontSize: 13,
+              fontWeight: 600,
+              textAlign: 'left',
+              padding: '4px 2px',
+            }}
           >
             + Agregar más archivos
           </button>
         </div>
       )}
 
-      {/* Drop zone */}
       {files.length === 0 && (
         <div
           onDragOver={(e) => {
@@ -101,34 +151,36 @@ export function FileDropZone({ files, onFilesChange }: Props) {
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          onClick={() => inputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-colors ${
-            dragging
-              ? 'border-accent bg-sky-50'
-              : 'border-slate-300 hover:border-slate-400 bg-white'
-          }`}
+          onClick={openNativeDialog}
+          style={{
+            border: `2px dashed ${dragging ? '#8B6145' : '#D4C4B8'}`,
+            borderRadius: 16,
+            padding: '48px 24px',
+            textAlign: 'center',
+            cursor: 'pointer',
+            background: dragging ? '#FDF6F0' : '#FAFAF8',
+            transition: 'all 0.15s',
+          }}
         >
-          <div className='text-4xl mb-3'>📂</div>
-          <p className='font-medium text-slate-700 mb-1'>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>📂</div>
+          <p
+            style={{
+              fontWeight: 600,
+              color: '#2D1F14',
+              marginBottom: 4,
+              fontSize: 15,
+            }}
+          >
             Arrastra tus archivos aquí
           </p>
-          <p className='text-sm text-slate-400 mb-3'>
+          <p style={{ fontSize: 13, color: '#9A7D6B', marginBottom: 8 }}>
             o haz clic para seleccionarlos
           </p>
-          <p className='text-xs text-slate-300'>
-            Excel · Word · PDF · Imágenes · Máx. {MAX_MB} MB
+          <p style={{ fontSize: 11, color: '#C4A899' }}>
+            Excel · Word · PDF · Imágenes &nbsp;·&nbsp; Máx. 500 MB
           </p>
         </div>
       )}
-
-      <input
-        ref={inputRef}
-        type='file'
-        multiple
-        accept={ALLOWED.join(',')}
-        onChange={handleInputChange}
-        className='hidden'
-      />
     </div>
   );
 }

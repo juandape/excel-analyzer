@@ -109,9 +109,12 @@ def _worksheet_to_dataframe(ws, warnings: list, sheet_name: str) -> pd.DataFrame
                     break
 
         headers = [str(c) if c is not None else f"Col_{j}" for j, c in enumerate(data[header_row])]
+        headers = headers[:MAX_COLS]
         rows = data[header_row + 1:]
+        # Truncar/rellenar filas para que coincidan exactamente con MAX_COLS
+        trimmed_rows = [list(r)[:MAX_COLS] + [''] * max(0, len(headers) - len(list(r))) for r in rows]
 
-        df = pd.DataFrame(rows, columns=headers[:MAX_COLS])
+        df = pd.DataFrame(trimmed_rows, columns=headers)
         df = df.dropna(how="all")
 
         # Samplear si es muy grande

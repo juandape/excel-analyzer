@@ -28,4 +28,14 @@ export function registerFileHandlers(_backendPort: number): void {
     if (result.canceled) return [];
     return result.filePaths;
   });
+
+  ipcMain.handle('dialog:select-pptx-template', async () => {
+    const result = await dialog.showOpenDialog({
+      title: 'Selecciona una plantilla PowerPoint',
+      properties: ['openFile'],
+      filters: [{ name: 'Plantilla PowerPoint', extensions: ['pptx'] }],
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return result.filePaths[0];
+  });
 }

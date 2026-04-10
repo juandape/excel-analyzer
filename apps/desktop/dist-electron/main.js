@@ -1,12 +1,2931 @@
-"use strict";var Ze=Object.defineProperty;var et=(l,c,s)=>c in l?Ze(l,c,{enumerable:!0,configurable:!0,writable:!0,value:s}):l[c]=s;var h=(l,c,s)=>et(l,typeof c!="symbol"?c+"":c,s);const m=require("electron"),x=require("path"),We=require("child_process"),P=require("fs"),I=require("os"),tt=require("util"),Be=require("events"),rt=require("http"),nt=require("https"),j=require("keytar"),st=require("stream/promises"),ot=require("stream");function it(l){return l&&l.__esModule&&Object.prototype.hasOwnProperty.call(l,"default")?l.default:l}var N={exports:{}},T={exports:{}},he;function Ue(){return he||(he=1,function(l){let c={};try{c=require("electron")}catch{}c.ipcRenderer&&s(c),l.exports=s;function s({contextBridge:o,ipcRenderer:i}){if(!i)return;i.on("__ELECTRON_LOG_IPC__",(e,t)=>{window.postMessage({cmd:"message",...t})}),i.invoke("__ELECTRON_LOG__",{cmd:"getOptions"}).catch(e=>console.error(new Error(`electron-log isn't initialized in the main process. Please call log.initialize() before. ${e.message}`)));const r={sendToMain(e){try{i.send("__ELECTRON_LOG__",e)}catch(t){console.error("electronLog.sendToMain ",t,"data:",e),i.send("__ELECTRON_LOG__",{cmd:"errorHandler",error:{message:t==null?void 0:t.message,stack:t==null?void 0:t.stack},errorName:"sendToMain"})}},log(...e){r.sendToMain({data:e,level:"info"})}};for(const e of["error","warn","info","verbose","debug","silly"])r[e]=(...t)=>r.sendToMain({data:t,level:e});if(o&&process.contextIsolated)try{o.exposeInMainWorld("__electronLog",r)}catch{}typeof window=="object"?window.__electronLog=r:__electronLog=r}}(T)),T.exports}var M={exports:{}},k,de;function at(){if(de)return k;de=1,k=l;function l(c){return Object.defineProperties(s,{defaultLabel:{value:"",writable:!0},labelPadding:{value:!0,writable:!0},maxLabelLength:{value:0,writable:!0},labelLength:{get(){switch(typeof s.labelPadding){case"boolean":return s.labelPadding?s.maxLabelLength:0;case"number":return s.labelPadding;default:return 0}}}});function s(o){s.maxLabelLength=Math.max(s.maxLabelLength,o.length);const i={};for(const r of c.levels)i[r]=(...e)=>c.logData(e,{level:r,scope:o});return i.log=i.info,i}}return k}var z,ge;function ct(){if(ge)return z;ge=1;class l{constructor({processMessage:s}){this.processMessage=s,this.buffer=[],this.enabled=!1,this.begin=this.begin.bind(this),this.commit=this.commit.bind(this),this.reject=this.reject.bind(this)}addMessage(s){this.buffer.push(s)}begin(){this.enabled=[]}commit(){this.enabled=!1,this.buffer.forEach(s=>this.processMessage(s)),this.buffer=[]}reject(){this.enabled=!1,this.buffer=[]}}return z=l,z}var W,ye;function He(){if(ye)return W;ye=1;const l=at(),c=ct(),o=class o{constructor({allowUnknownLevel:r=!1,dependencies:e={},errorHandler:t,eventLogger:n,initializeFn:a,isDev:u=!1,levels:p=["error","warn","info","verbose","debug","silly"],logId:f,transportFactories:d={},variables:S}={}){h(this,"dependencies",{});h(this,"errorHandler",null);h(this,"eventLogger",null);h(this,"functions",{});h(this,"hooks",[]);h(this,"isDev",!1);h(this,"levels",null);h(this,"logId",null);h(this,"scope",null);h(this,"transports",{});h(this,"variables",{});this.addLevel=this.addLevel.bind(this),this.create=this.create.bind(this),this.initialize=this.initialize.bind(this),this.logData=this.logData.bind(this),this.processMessage=this.processMessage.bind(this),this.allowUnknownLevel=r,this.buffering=new c(this),this.dependencies=e,this.initializeFn=a,this.isDev=u,this.levels=p,this.logId=f,this.scope=l(this),this.transportFactories=d,this.variables=S||{};for(const y of this.levels)this.addLevel(y,!1);this.log=this.info,this.functions.log=this.log,this.errorHandler=t,t==null||t.setOptions({...e,logFn:this.error}),this.eventLogger=n,n==null||n.setOptions({...e,logger:this});for(const[y,g]of Object.entries(d))this.transports[y]=g(this,e);o.instances[f]=this}static getInstance({logId:r}){return this.instances[r]||this.instances.default}addLevel(r,e=this.levels.length){e!==!1&&this.levels.splice(e,0,r),this[r]=(...t)=>this.logData(t,{level:r}),this.functions[r]=this[r]}catchErrors(r){return this.processMessage({data:["log.catchErrors is deprecated. Use log.errorHandler instead"],level:"warn"},{transports:["console"]}),this.errorHandler.startCatching(r)}create(r){return typeof r=="string"&&(r={logId:r}),new o({dependencies:this.dependencies,errorHandler:this.errorHandler,initializeFn:this.initializeFn,isDev:this.isDev,transportFactories:this.transportFactories,variables:{...this.variables},...r})}compareLevels(r,e,t=this.levels){const n=t.indexOf(r),a=t.indexOf(e);return a===-1||n===-1?!0:a<=n}initialize(r={}){this.initializeFn({logger:this,...this.dependencies,...r})}logData(r,e={}){this.buffering.enabled?this.buffering.addMessage({data:r,date:new Date,...e}):this.processMessage({data:r,...e})}processMessage(r,{transports:e=this.transports}={}){if(r.cmd==="errorHandler"){this.errorHandler.handle(r.error,{errorName:r.errorName,processType:"renderer",showDialog:!!r.showDialog});return}let t=r.level;this.allowUnknownLevel||(t=this.levels.includes(r.level)?r.level:"info");const n={date:new Date,logId:this.logId,...r,level:t,variables:{...this.variables,...r.variables}};for(const[a,u]of this.transportEntries(e))if(!(typeof u!="function"||u.level===!1)&&this.compareLevels(u.level,r.level))try{const p=this.hooks.reduce((f,d)=>f&&d(f,u,a),n);p&&u({...p,data:[...p.data]})}catch(p){this.processInternalErrorFn(p)}}processInternalErrorFn(r){}transportEntries(r=this.transports){return(Array.isArray(r)?r:Object.entries(r)).map(t=>{switch(typeof t){case"string":return this.transports[t]?[t,this.transports[t]]:null;case"function":return[t.name,t];default:return Array.isArray(t)?t:null}}).filter(Boolean)}};h(o,"instances",{});let s=o;return W=s,W}var B,me;function lt(){if(me)return B;me=1;const l=console.error;class c{constructor({logFn:o=null}={}){h(this,"logFn",null);h(this,"onError",null);h(this,"showDialog",!1);h(this,"preventDefault",!0);this.handleError=this.handleError.bind(this),this.handleRejection=this.handleRejection.bind(this),this.startCatching=this.startCatching.bind(this),this.logFn=o}handle(o,{logFn:i=this.logFn,errorName:r="",onError:e=this.onError,showDialog:t=this.showDialog}={}){try{(e==null?void 0:e({error:o,errorName:r,processType:"renderer"}))!==!1&&i({error:o,errorName:r,showDialog:t})}catch{l(o)}}setOptions({logFn:o,onError:i,preventDefault:r,showDialog:e}){typeof o=="function"&&(this.logFn=o),typeof i=="function"&&(this.onError=i),typeof r=="boolean"&&(this.preventDefault=r),typeof e=="boolean"&&(this.showDialog=e)}startCatching({onError:o,showDialog:i}={}){this.isActive||(this.isActive=!0,this.setOptions({onError:o,showDialog:i}),window.addEventListener("error",r=>{var e;this.preventDefault&&((e=r.preventDefault)==null||e.call(r)),this.handleError(r.error||r)}),window.addEventListener("unhandledrejection",r=>{var e;this.preventDefault&&((e=r.preventDefault)==null||e.call(r)),this.handleRejection(r.reason||r)}))}handleError(o){this.handle(o,{errorName:"Unhandled"})}handleRejection(o){const i=o instanceof Error?o:new Error(JSON.stringify(o));this.handle(i,{errorName:"Unhandled rejection"})}}return B=c,B}var U,ve;function F(){if(ve)return U;ve=1,U={transform:l};function l({logger:c,message:s,transport:o,initialData:i=(s==null?void 0:s.data)||[],transforms:r=o==null?void 0:o.transforms}){return r.reduce((e,t)=>typeof t=="function"?t({data:e,logger:c,message:s,transport:o}):e,i)}return U}var H,we;function ut(){if(we)return H;we=1;const{transform:l}=F();H=s;const c={error:console.error,warn:console.warn,info:console.info,verbose:console.info,debug:console.debug,silly:console.debug,log:console.log};function s(i){return Object.assign(r,{format:"{h}:{i}:{s}.{ms}{scope} › {text}",transforms:[o],writeFn({message:{level:e,data:t}}){const n=c[e]||c.info;setTimeout(()=>n(...t))}});function r(e){r.writeFn({message:{...e,data:l({logger:i,message:e,transport:r})}})}}function o({data:i=[],logger:r={},message:e={},transport:t={}}){if(typeof t.format=="function")return t.format({data:i,level:(e==null?void 0:e.level)||"info",logger:r,message:e,transport:t});if(typeof t.format!="string")return i;i.unshift(t.format),typeof i[1]=="string"&&i[1].match(/%[1cdfiOos]/)&&(i=[`${i[0]}${i[1]}`,...i.slice(2)]);const n=e.date||new Date;return i[0]=i[0].replace(/\{(\w+)}/g,(a,u)=>{var p,f;switch(u){case"level":return e.level;case"logId":return e.logId;case"scope":{const d=e.scope||((p=r.scope)==null?void 0:p.defaultLabel);return d?` (${d})`:""}case"text":return"";case"y":return n.getFullYear().toString(10);case"m":return(n.getMonth()+1).toString(10).padStart(2,"0");case"d":return n.getDate().toString(10).padStart(2,"0");case"h":return n.getHours().toString(10).padStart(2,"0");case"i":return n.getMinutes().toString(10).padStart(2,"0");case"s":return n.getSeconds().toString(10).padStart(2,"0");case"ms":return n.getMilliseconds().toString(10).padStart(3,"0");case"iso":return n.toISOString();default:return((f=e.variables)==null?void 0:f[u])||a}}).trim(),i}return H}var J,be;function pt(){if(be)return J;be=1;const{transform:l}=F();J=s;const c=new Set([Promise,WeakMap,WeakSet]);function s(r){return Object.assign(e,{depth:5,transforms:[i]});function e(t){if(!window.__electronLog){r.processMessage({data:["electron-log: logger isn't initialized in the main process"],level:"error"},{transports:["console"]});return}try{const n=l({initialData:t,logger:r,message:t,transport:e});__electronLog.sendToMain(n)}catch(n){r.transports.console({data:["electronLog.transports.ipc",n,"data:",t.data],level:"error"})}}}function o(r){return Object(r)!==r}function i({data:r,depth:e,seen:t=new WeakSet,transport:n={}}={}){const a=e||n.depth||5;return t.has(r)?"[Circular]":a<1?o(r)?r:Array.isArray(r)?"[Array]":`[${typeof r}]`:["function","symbol"].includes(typeof r)?r.toString():o(r)?r:c.has(r.constructor)?`[${r.constructor.name}]`:Array.isArray(r)?r.map(u=>i({data:u,depth:a-1,seen:t})):r instanceof Date?r.toISOString():r instanceof Error?r.stack:r instanceof Map?new Map(Array.from(r).map(([u,p])=>[i({data:u,depth:a-1,seen:t}),i({data:p,depth:a-1,seen:t})])):r instanceof Set?new Set(Array.from(r).map(u=>i({data:u,depth:a-1,seen:t}))):(t.add(r),Object.fromEntries(Object.entries(r).map(([u,p])=>[u,i({data:p,depth:a-1,seen:t})])))}return J}var Se;function ft(){return Se||(Se=1,function(l){const c=He(),s=lt(),o=ut(),i=pt();typeof process=="object"&&process.type==="browser"&&console.warn("electron-log/renderer is loaded in the main process. It could cause unexpected behaviour."),l.exports=r(),l.exports.Logger=c,l.exports.default=l.exports;function r(){const e=new c({allowUnknownLevel:!0,errorHandler:new s,initializeFn:()=>{},logId:"default",transportFactories:{console:o,ipc:i},variables:{processType:"renderer"}});return e.errorHandler.setOptions({logFn({error:t,errorName:n,showDialog:a}){e.transports.console({data:[n,t].filter(Boolean),level:"error"}),e.transports.ipc({cmd:"errorHandler",error:{cause:t==null?void 0:t.cause,code:t==null?void 0:t.code,name:t==null?void 0:t.name,message:t==null?void 0:t.message,stack:t==null?void 0:t.stack},errorName:n,logId:e.logId,showDialog:a})}}),typeof window=="object"&&window.addEventListener("message",t=>{const{cmd:n,logId:a,...u}=t.data||{},p=c.getInstance({logId:a});n==="message"&&p.processMessage(u,{transports:["console"]})}),new Proxy(e,{get(t,n){return typeof t[n]<"u"?t[n]:(...a)=>e.logData(a,{level:n})}})}}(M)),M.exports}var V,Ee;function ht(){if(Ee)return V;Ee=1;const l=P,c=x;V={findAndReadPackageJson:s,tryReadJsonAt:o};function s(){return o(e())||o(r())||o(process.resourcesPath,"app.asar")||o(process.resourcesPath,"app")||o(process.cwd())||{name:void 0,version:void 0}}function o(...t){if(t[0])try{const n=c.join(...t),a=i("package.json",n);if(!a)return;const u=JSON.parse(l.readFileSync(a,"utf8")),p=(u==null?void 0:u.productName)||(u==null?void 0:u.name);return!p||p.toLowerCase()==="electron"?void 0:p?{name:p,version:u==null?void 0:u.version}:void 0}catch{return}}function i(t,n){let a=n;for(;;){const u=c.parse(a),p=u.root,f=u.dir;if(l.existsSync(c.join(a,t)))return c.resolve(c.join(a,t));if(a===p)return null;a=f}}function r(){const t=process.argv.filter(a=>a.indexOf("--user-data-dir=")===0);return t.length===0||typeof t[0]!="string"?null:t[0].replace("--user-data-dir=","")}function e(){var t;try{return(t=require.main)==null?void 0:t.filename}catch{return}}return V}var G,Oe;function Je(){if(Oe)return G;Oe=1;const l=We,c=I,s=x,o=ht();class i{constructor(){h(this,"appName");h(this,"appPackageJson");h(this,"platform",process.platform)}getAppLogPath(e=this.getAppName()){return this.platform==="darwin"?s.join(this.getSystemPathHome(),"Library/Logs",e):s.join(this.getAppUserDataPath(e),"logs")}getAppName(){var t;const e=this.appName||((t=this.getAppPackageJson())==null?void 0:t.name);if(!e)throw new Error("electron-log can't determine the app name. It tried these methods:\n1. Use `electron.app.name`\n2. Use productName or name from the nearest package.json`\nYou can also set it through log.transports.file.setAppName()");return e}getAppPackageJson(){return typeof this.appPackageJson!="object"&&(this.appPackageJson=o.findAndReadPackageJson()),this.appPackageJson}getAppUserDataPath(e=this.getAppName()){return e?s.join(this.getSystemPathAppData(),e):void 0}getAppVersion(){var e;return(e=this.getAppPackageJson())==null?void 0:e.version}getElectronLogPath(){return this.getAppLogPath()}getMacOsVersion(){const e=Number(c.release().split(".")[0]);return e<=19?`10.${e-4}`:e-9}getOsVersion(){let e=c.type().replace("_"," "),t=c.release();return e==="Darwin"&&(e="macOS",t=this.getMacOsVersion()),`${e} ${t}`}getPathVariables(){const e=this.getAppName(),t=this.getAppVersion(),n=this;return{appData:this.getSystemPathAppData(),appName:e,appVersion:t,get electronDefaultDir(){return n.getElectronLogPath()},home:this.getSystemPathHome(),libraryDefaultDir:this.getAppLogPath(e),libraryTemplate:this.getAppLogPath("{appName}"),temp:this.getSystemPathTemp(),userData:this.getAppUserDataPath(e)}}getSystemPathAppData(){const e=this.getSystemPathHome();switch(this.platform){case"darwin":return s.join(e,"Library/Application Support");case"win32":return process.env.APPDATA||s.join(e,"AppData/Roaming");default:return process.env.XDG_CONFIG_HOME||s.join(e,".config")}}getSystemPathHome(){var e;return((e=c.homedir)==null?void 0:e.call(c))||process.env.HOME}getSystemPathTemp(){return c.tmpdir()}getVersions(){return{app:`${this.getAppName()} ${this.getAppVersion()}`,electron:void 0,os:this.getOsVersion()}}isDev(){return process.env.NODE_ENV==="development"||process.env.ELECTRON_IS_DEV==="1"}isElectron(){return!!process.versions.electron}onAppEvent(e,t){}onAppReady(e){e()}onEveryWebContentsEvent(e,t){}onIpc(e,t){}onIpcInvoke(e,t){}openUrl(e,t=console.error){const a={darwin:"open",win32:"start",linux:"xdg-open"}[process.platform]||"xdg-open";l.exec(`${a} ${e}`,{},u=>{u&&t(u)})}setAppName(e){this.appName=e}setPlatform(e){this.platform=e}setPreloadFileForSessions({filePath:e,includeFutureSession:t=!0,getSessions:n=()=>[]}){}sendIpc(e,t){}showErrorBox(e,t){}}return G=i,G}var K,Ae;function dt(){if(Ae)return K;Ae=1;const l=x,c=Je();class s extends c{constructor({electron:r}={}){super();h(this,"electron");this.electron=r}getAppName(){var e,t;let r;try{r=this.appName||((e=this.electron.app)==null?void 0:e.name)||((t=this.electron.app)==null?void 0:t.getName())}catch{}return r||super.getAppName()}getAppUserDataPath(r){return this.getPath("userData")||super.getAppUserDataPath(r)}getAppVersion(){var e;let r;try{r=(e=this.electron.app)==null?void 0:e.getVersion()}catch{}return r||super.getAppVersion()}getElectronLogPath(){return this.getPath("logs")||super.getElectronLogPath()}getPath(r){var e;try{return(e=this.electron.app)==null?void 0:e.getPath(r)}catch{return}}getVersions(){return{app:`${this.getAppName()} ${this.getAppVersion()}`,electron:`Electron ${process.versions.electron}`,os:this.getOsVersion()}}getSystemPathAppData(){return this.getPath("appData")||super.getSystemPathAppData()}isDev(){var r;return((r=this.electron.app)==null?void 0:r.isPackaged)!==void 0?!this.electron.app.isPackaged:typeof process.execPath=="string"?l.basename(process.execPath).toLowerCase().startsWith("electron"):super.isDev()}onAppEvent(r,e){var t;return(t=this.electron.app)==null||t.on(r,e),()=>{var n;(n=this.electron.app)==null||n.off(r,e)}}onAppReady(r){var e,t,n;(e=this.electron.app)!=null&&e.isReady()?r():(t=this.electron.app)!=null&&t.once?(n=this.electron.app)==null||n.once("ready",r):r()}onEveryWebContentsEvent(r,e){var n,a,u;return(a=(n=this.electron.webContents)==null?void 0:n.getAllWebContents())==null||a.forEach(p=>{p.on(r,e)}),(u=this.electron.app)==null||u.on("web-contents-created",t),()=>{var p,f;(p=this.electron.webContents)==null||p.getAllWebContents().forEach(d=>{d.off(r,e)}),(f=this.electron.app)==null||f.off("web-contents-created",t)};function t(p,f){f.on(r,e)}}onIpc(r,e){var t;(t=this.electron.ipcMain)==null||t.on(r,e)}onIpcInvoke(r,e){var t,n;(n=(t=this.electron.ipcMain)==null?void 0:t.handle)==null||n.call(t,r,e)}openUrl(r,e=console.error){var t;(t=this.electron.shell)==null||t.openExternal(r).catch(e)}setPreloadFileForSessions({filePath:r,includeFutureSession:e=!0,getSessions:t=()=>{var n;return[(n=this.electron.session)==null?void 0:n.defaultSession]}}){for(const a of t().filter(Boolean))n(a);e&&this.onAppEvent("session-created",a=>{n(a)});function n(a){typeof a.registerPreloadScript=="function"?a.registerPreloadScript({filePath:r,id:"electron-log-preload",type:"frame"}):a.setPreloads([...a.getPreloads(),r])}}sendIpc(r,e){var t,n;(n=(t=this.electron.BrowserWindow)==null?void 0:t.getAllWindows())==null||n.forEach(a=>{var u,p;((u=a.webContents)==null?void 0:u.isDestroyed())===!1&&((p=a.webContents)==null?void 0:p.isCrashed())===!1&&a.webContents.send(r,e)})}showErrorBox(r,e){var t;(t=this.electron.dialog)==null||t.showErrorBox(r,e)}}return K=s,K}var Y,Le;function gt(){if(Le)return Y;Le=1;const l=P,c=I,s=x,o=Ue();let i=!1,r=!1;Y={initialize({externalApi:n,getSessions:a,includeFutureSession:u,logger:p,preload:f=!0,spyRendererConsole:d=!1}){n.onAppReady(()=>{try{f&&e({externalApi:n,getSessions:a,includeFutureSession:u,logger:p,preloadOption:f}),d&&t({externalApi:n,logger:p})}catch(S){p.warn(S)}})}};function e({externalApi:n,getSessions:a,includeFutureSession:u,logger:p,preloadOption:f}){let d=typeof f=="string"?f:void 0;if(i){p.warn(new Error("log.initialize({ preload }) already called").stack);return}i=!0;try{d=s.resolve(__dirname,"../renderer/electron-log-preload.js")}catch{}if(!d||!l.existsSync(d)){d=s.join(n.getAppUserDataPath()||c.tmpdir(),"electron-log-preload.js");const S=`
+"use strict";
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+const require$$0$5 = require("electron");
+const require$$2 = require("path");
+const require$$0$1 = require("child_process");
+const require$$0 = require("fs");
+const require$$1 = require("os");
+const require$$0$2 = require("util");
+const require$$0$3 = require("events");
+const require$$0$4 = require("http");
+const require$$1$1 = require("https");
+const promises = require("stream/promises");
+const stream = require("stream");
+function getDefaultExportFromCjs(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
+var src = { exports: {} };
+var electronLogPreload = { exports: {} };
+var hasRequiredElectronLogPreload;
+function requireElectronLogPreload() {
+  if (hasRequiredElectronLogPreload) return electronLogPreload.exports;
+  hasRequiredElectronLogPreload = 1;
+  (function(module2) {
+    let electron = {};
+    try {
+      electron = require("electron");
+    } catch (e) {
+    }
+    if (electron.ipcRenderer) {
+      initialize2(electron);
+    }
+    {
+      module2.exports = initialize2;
+    }
+    function initialize2({ contextBridge, ipcRenderer }) {
+      if (!ipcRenderer) {
+        return;
+      }
+      ipcRenderer.on("__ELECTRON_LOG_IPC__", (_, message) => {
+        window.postMessage({ cmd: "message", ...message });
+      });
+      ipcRenderer.invoke("__ELECTRON_LOG__", { cmd: "getOptions" }).catch((e) => console.error(new Error(
+        `electron-log isn't initialized in the main process. Please call log.initialize() before. ${e.message}`
+      )));
+      const electronLog = {
+        sendToMain(message) {
+          try {
+            ipcRenderer.send("__ELECTRON_LOG__", message);
+          } catch (e) {
+            console.error("electronLog.sendToMain ", e, "data:", message);
+            ipcRenderer.send("__ELECTRON_LOG__", {
+              cmd: "errorHandler",
+              error: { message: e == null ? void 0 : e.message, stack: e == null ? void 0 : e.stack },
+              errorName: "sendToMain"
+            });
+          }
+        },
+        log(...data) {
+          electronLog.sendToMain({ data, level: "info" });
+        }
+      };
+      for (const level of ["error", "warn", "info", "verbose", "debug", "silly"]) {
+        electronLog[level] = (...data) => electronLog.sendToMain({
+          data,
+          level
+        });
+      }
+      if (contextBridge && process.contextIsolated) {
+        try {
+          contextBridge.exposeInMainWorld("__electronLog", electronLog);
+        } catch {
+        }
+      }
+      if (typeof window === "object") {
+        window.__electronLog = electronLog;
+      } else {
+        __electronLog = electronLog;
+      }
+    }
+  })(electronLogPreload);
+  return electronLogPreload.exports;
+}
+var renderer = { exports: {} };
+var scope;
+var hasRequiredScope;
+function requireScope() {
+  if (hasRequiredScope) return scope;
+  hasRequiredScope = 1;
+  scope = scopeFactory;
+  function scopeFactory(logger) {
+    return Object.defineProperties(scope2, {
+      defaultLabel: { value: "", writable: true },
+      labelPadding: { value: true, writable: true },
+      maxLabelLength: { value: 0, writable: true },
+      labelLength: {
+        get() {
+          switch (typeof scope2.labelPadding) {
+            case "boolean":
+              return scope2.labelPadding ? scope2.maxLabelLength : 0;
+            case "number":
+              return scope2.labelPadding;
+            default:
+              return 0;
+          }
+        }
+      }
+    });
+    function scope2(label) {
+      scope2.maxLabelLength = Math.max(scope2.maxLabelLength, label.length);
+      const newScope = {};
+      for (const level of logger.levels) {
+        newScope[level] = (...d) => logger.logData(d, { level, scope: label });
+      }
+      newScope.log = newScope.info;
+      return newScope;
+    }
+  }
+  return scope;
+}
+var Buffering_1;
+var hasRequiredBuffering;
+function requireBuffering() {
+  if (hasRequiredBuffering) return Buffering_1;
+  hasRequiredBuffering = 1;
+  class Buffering {
+    constructor({ processMessage }) {
+      this.processMessage = processMessage;
+      this.buffer = [];
+      this.enabled = false;
+      this.begin = this.begin.bind(this);
+      this.commit = this.commit.bind(this);
+      this.reject = this.reject.bind(this);
+    }
+    addMessage(message) {
+      this.buffer.push(message);
+    }
+    begin() {
+      this.enabled = [];
+    }
+    commit() {
+      this.enabled = false;
+      this.buffer.forEach((item) => this.processMessage(item));
+      this.buffer = [];
+    }
+    reject() {
+      this.enabled = false;
+      this.buffer = [];
+    }
+  }
+  Buffering_1 = Buffering;
+  return Buffering_1;
+}
+var Logger_1;
+var hasRequiredLogger;
+function requireLogger() {
+  if (hasRequiredLogger) return Logger_1;
+  hasRequiredLogger = 1;
+  const scopeFactory = requireScope();
+  const Buffering = requireBuffering();
+  const _Logger = class _Logger {
+    constructor({
+      allowUnknownLevel = false,
+      dependencies = {},
+      errorHandler,
+      eventLogger,
+      initializeFn,
+      isDev = false,
+      levels = ["error", "warn", "info", "verbose", "debug", "silly"],
+      logId,
+      transportFactories = {},
+      variables
+    } = {}) {
+      __publicField(this, "dependencies", {});
+      __publicField(this, "errorHandler", null);
+      __publicField(this, "eventLogger", null);
+      __publicField(this, "functions", {});
+      __publicField(this, "hooks", []);
+      __publicField(this, "isDev", false);
+      __publicField(this, "levels", null);
+      __publicField(this, "logId", null);
+      __publicField(this, "scope", null);
+      __publicField(this, "transports", {});
+      __publicField(this, "variables", {});
+      this.addLevel = this.addLevel.bind(this);
+      this.create = this.create.bind(this);
+      this.initialize = this.initialize.bind(this);
+      this.logData = this.logData.bind(this);
+      this.processMessage = this.processMessage.bind(this);
+      this.allowUnknownLevel = allowUnknownLevel;
+      this.buffering = new Buffering(this);
+      this.dependencies = dependencies;
+      this.initializeFn = initializeFn;
+      this.isDev = isDev;
+      this.levels = levels;
+      this.logId = logId;
+      this.scope = scopeFactory(this);
+      this.transportFactories = transportFactories;
+      this.variables = variables || {};
+      for (const name of this.levels) {
+        this.addLevel(name, false);
+      }
+      this.log = this.info;
+      this.functions.log = this.log;
+      this.errorHandler = errorHandler;
+      errorHandler == null ? void 0 : errorHandler.setOptions({ ...dependencies, logFn: this.error });
+      this.eventLogger = eventLogger;
+      eventLogger == null ? void 0 : eventLogger.setOptions({ ...dependencies, logger: this });
+      for (const [name, factory] of Object.entries(transportFactories)) {
+        this.transports[name] = factory(this, dependencies);
+      }
+      _Logger.instances[logId] = this;
+    }
+    static getInstance({ logId }) {
+      return this.instances[logId] || this.instances.default;
+    }
+    addLevel(level, index = this.levels.length) {
+      if (index !== false) {
+        this.levels.splice(index, 0, level);
+      }
+      this[level] = (...args) => this.logData(args, { level });
+      this.functions[level] = this[level];
+    }
+    catchErrors(options) {
+      this.processMessage(
+        {
+          data: ["log.catchErrors is deprecated. Use log.errorHandler instead"],
+          level: "warn"
+        },
+        { transports: ["console"] }
+      );
+      return this.errorHandler.startCatching(options);
+    }
+    create(options) {
+      if (typeof options === "string") {
+        options = { logId: options };
+      }
+      return new _Logger({
+        dependencies: this.dependencies,
+        errorHandler: this.errorHandler,
+        initializeFn: this.initializeFn,
+        isDev: this.isDev,
+        transportFactories: this.transportFactories,
+        variables: { ...this.variables },
+        ...options
+      });
+    }
+    compareLevels(passLevel, checkLevel, levels = this.levels) {
+      const pass = levels.indexOf(passLevel);
+      const check = levels.indexOf(checkLevel);
+      if (check === -1 || pass === -1) {
+        return true;
+      }
+      return check <= pass;
+    }
+    initialize(options = {}) {
+      this.initializeFn({ logger: this, ...this.dependencies, ...options });
+    }
+    logData(data, options = {}) {
+      if (this.buffering.enabled) {
+        this.buffering.addMessage({ data, date: /* @__PURE__ */ new Date(), ...options });
+      } else {
+        this.processMessage({ data, ...options });
+      }
+    }
+    processMessage(message, { transports = this.transports } = {}) {
+      if (message.cmd === "errorHandler") {
+        this.errorHandler.handle(message.error, {
+          errorName: message.errorName,
+          processType: "renderer",
+          showDialog: Boolean(message.showDialog)
+        });
+        return;
+      }
+      let level = message.level;
+      if (!this.allowUnknownLevel) {
+        level = this.levels.includes(message.level) ? message.level : "info";
+      }
+      const normalizedMessage = {
+        date: /* @__PURE__ */ new Date(),
+        logId: this.logId,
+        ...message,
+        level,
+        variables: {
+          ...this.variables,
+          ...message.variables
+        }
+      };
+      for (const [transName, transFn] of this.transportEntries(transports)) {
+        if (typeof transFn !== "function" || transFn.level === false) {
+          continue;
+        }
+        if (!this.compareLevels(transFn.level, message.level)) {
+          continue;
+        }
+        try {
+          const transformedMsg = this.hooks.reduce((msg, hook) => {
+            return msg ? hook(msg, transFn, transName) : msg;
+          }, normalizedMessage);
+          if (transformedMsg) {
+            transFn({ ...transformedMsg, data: [...transformedMsg.data] });
+          }
+        } catch (e) {
+          this.processInternalErrorFn(e);
+        }
+      }
+    }
+    processInternalErrorFn(_e) {
+    }
+    transportEntries(transports = this.transports) {
+      const transportArray = Array.isArray(transports) ? transports : Object.entries(transports);
+      return transportArray.map((item) => {
+        switch (typeof item) {
+          case "string":
+            return this.transports[item] ? [item, this.transports[item]] : null;
+          case "function":
+            return [item.name, item];
+          default:
+            return Array.isArray(item) ? item : null;
+        }
+      }).filter(Boolean);
+    }
+  };
+  __publicField(_Logger, "instances", {});
+  let Logger = _Logger;
+  Logger_1 = Logger;
+  return Logger_1;
+}
+var RendererErrorHandler_1;
+var hasRequiredRendererErrorHandler;
+function requireRendererErrorHandler() {
+  if (hasRequiredRendererErrorHandler) return RendererErrorHandler_1;
+  hasRequiredRendererErrorHandler = 1;
+  const consoleError = console.error;
+  class RendererErrorHandler {
+    constructor({ logFn = null } = {}) {
+      __publicField(this, "logFn", null);
+      __publicField(this, "onError", null);
+      __publicField(this, "showDialog", false);
+      __publicField(this, "preventDefault", true);
+      this.handleError = this.handleError.bind(this);
+      this.handleRejection = this.handleRejection.bind(this);
+      this.startCatching = this.startCatching.bind(this);
+      this.logFn = logFn;
+    }
+    handle(error, {
+      logFn = this.logFn,
+      errorName = "",
+      onError = this.onError,
+      showDialog = this.showDialog
+    } = {}) {
       try {
-        (${o.toString()})(require('electron'));
+        if ((onError == null ? void 0 : onError({ error, errorName, processType: "renderer" })) !== false) {
+          logFn({ error, errorName, showDialog });
+        }
+      } catch {
+        consoleError(error);
+      }
+    }
+    setOptions({ logFn, onError, preventDefault, showDialog }) {
+      if (typeof logFn === "function") {
+        this.logFn = logFn;
+      }
+      if (typeof onError === "function") {
+        this.onError = onError;
+      }
+      if (typeof preventDefault === "boolean") {
+        this.preventDefault = preventDefault;
+      }
+      if (typeof showDialog === "boolean") {
+        this.showDialog = showDialog;
+      }
+    }
+    startCatching({ onError, showDialog } = {}) {
+      if (this.isActive) {
+        return;
+      }
+      this.isActive = true;
+      this.setOptions({ onError, showDialog });
+      window.addEventListener("error", (event) => {
+        var _a;
+        this.preventDefault && ((_a = event.preventDefault) == null ? void 0 : _a.call(event));
+        this.handleError(event.error || event);
+      });
+      window.addEventListener("unhandledrejection", (event) => {
+        var _a;
+        this.preventDefault && ((_a = event.preventDefault) == null ? void 0 : _a.call(event));
+        this.handleRejection(event.reason || event);
+      });
+    }
+    handleError(error) {
+      this.handle(error, { errorName: "Unhandled" });
+    }
+    handleRejection(reason) {
+      const error = reason instanceof Error ? reason : new Error(JSON.stringify(reason));
+      this.handle(error, { errorName: "Unhandled rejection" });
+    }
+  }
+  RendererErrorHandler_1 = RendererErrorHandler;
+  return RendererErrorHandler_1;
+}
+var transform_1;
+var hasRequiredTransform;
+function requireTransform() {
+  if (hasRequiredTransform) return transform_1;
+  hasRequiredTransform = 1;
+  transform_1 = { transform };
+  function transform({
+    logger,
+    message,
+    transport,
+    initialData = (message == null ? void 0 : message.data) || [],
+    transforms = transport == null ? void 0 : transport.transforms
+  }) {
+    return transforms.reduce((data, trans) => {
+      if (typeof trans === "function") {
+        return trans({ data, logger, message, transport });
+      }
+      return data;
+    }, initialData);
+  }
+  return transform_1;
+}
+var console_1$1;
+var hasRequiredConsole$1;
+function requireConsole$1() {
+  if (hasRequiredConsole$1) return console_1$1;
+  hasRequiredConsole$1 = 1;
+  const { transform } = requireTransform();
+  console_1$1 = consoleTransportRendererFactory;
+  const consoleMethods = {
+    error: console.error,
+    warn: console.warn,
+    info: console.info,
+    verbose: console.info,
+    debug: console.debug,
+    silly: console.debug,
+    log: console.log
+  };
+  function consoleTransportRendererFactory(logger) {
+    return Object.assign(transport, {
+      format: "{h}:{i}:{s}.{ms}{scope} › {text}",
+      transforms: [formatDataFn],
+      writeFn({ message: { level, data } }) {
+        const consoleLogFn = consoleMethods[level] || consoleMethods.info;
+        setTimeout(() => consoleLogFn(...data));
+      }
+    });
+    function transport(message) {
+      transport.writeFn({
+        message: { ...message, data: transform({ logger, message, transport }) }
+      });
+    }
+  }
+  function formatDataFn({
+    data = [],
+    logger = {},
+    message = {},
+    transport = {}
+  }) {
+    if (typeof transport.format === "function") {
+      return transport.format({
+        data,
+        level: (message == null ? void 0 : message.level) || "info",
+        logger,
+        message,
+        transport
+      });
+    }
+    if (typeof transport.format !== "string") {
+      return data;
+    }
+    data.unshift(transport.format);
+    if (typeof data[1] === "string" && data[1].match(/%[1cdfiOos]/)) {
+      data = [`${data[0]}${data[1]}`, ...data.slice(2)];
+    }
+    const date = message.date || /* @__PURE__ */ new Date();
+    data[0] = data[0].replace(/\{(\w+)}/g, (substring, name) => {
+      var _a, _b;
+      switch (name) {
+        case "level":
+          return message.level;
+        case "logId":
+          return message.logId;
+        case "scope": {
+          const scope2 = message.scope || ((_a = logger.scope) == null ? void 0 : _a.defaultLabel);
+          return scope2 ? ` (${scope2})` : "";
+        }
+        case "text":
+          return "";
+        case "y":
+          return date.getFullYear().toString(10);
+        case "m":
+          return (date.getMonth() + 1).toString(10).padStart(2, "0");
+        case "d":
+          return date.getDate().toString(10).padStart(2, "0");
+        case "h":
+          return date.getHours().toString(10).padStart(2, "0");
+        case "i":
+          return date.getMinutes().toString(10).padStart(2, "0");
+        case "s":
+          return date.getSeconds().toString(10).padStart(2, "0");
+        case "ms":
+          return date.getMilliseconds().toString(10).padStart(3, "0");
+        case "iso":
+          return date.toISOString();
+        default:
+          return ((_b = message.variables) == null ? void 0 : _b[name]) || substring;
+      }
+    }).trim();
+    return data;
+  }
+  return console_1$1;
+}
+var ipc$1;
+var hasRequiredIpc$1;
+function requireIpc$1() {
+  if (hasRequiredIpc$1) return ipc$1;
+  hasRequiredIpc$1 = 1;
+  const { transform } = requireTransform();
+  ipc$1 = ipcTransportRendererFactory;
+  const RESTRICTED_TYPES = /* @__PURE__ */ new Set([Promise, WeakMap, WeakSet]);
+  function ipcTransportRendererFactory(logger) {
+    return Object.assign(transport, {
+      depth: 5,
+      transforms: [serializeFn]
+    });
+    function transport(message) {
+      if (!window.__electronLog) {
+        logger.processMessage(
+          {
+            data: ["electron-log: logger isn't initialized in the main process"],
+            level: "error"
+          },
+          { transports: ["console"] }
+        );
+        return;
+      }
+      try {
+        const serialized = transform({
+          initialData: message,
+          logger,
+          message,
+          transport
+        });
+        __electronLog.sendToMain(serialized);
+      } catch (e) {
+        logger.transports.console({
+          data: ["electronLog.transports.ipc", e, "data:", message.data],
+          level: "error"
+        });
+      }
+    }
+  }
+  function isPrimitive(value) {
+    return Object(value) !== value;
+  }
+  function serializeFn({
+    data,
+    depth,
+    seen = /* @__PURE__ */ new WeakSet(),
+    transport = {}
+  } = {}) {
+    const actualDepth = depth || transport.depth || 5;
+    if (seen.has(data)) {
+      return "[Circular]";
+    }
+    if (actualDepth < 1) {
+      if (isPrimitive(data)) {
+        return data;
+      }
+      if (Array.isArray(data)) {
+        return "[Array]";
+      }
+      return `[${typeof data}]`;
+    }
+    if (["function", "symbol"].includes(typeof data)) {
+      return data.toString();
+    }
+    if (isPrimitive(data)) {
+      return data;
+    }
+    if (RESTRICTED_TYPES.has(data.constructor)) {
+      return `[${data.constructor.name}]`;
+    }
+    if (Array.isArray(data)) {
+      return data.map((item) => serializeFn({
+        data: item,
+        depth: actualDepth - 1,
+        seen
+      }));
+    }
+    if (data instanceof Date) {
+      return data.toISOString();
+    }
+    if (data instanceof Error) {
+      return data.stack;
+    }
+    if (data instanceof Map) {
+      return new Map(
+        Array.from(data).map(([key, value]) => [
+          serializeFn({ data: key, depth: actualDepth - 1, seen }),
+          serializeFn({ data: value, depth: actualDepth - 1, seen })
+        ])
+      );
+    }
+    if (data instanceof Set) {
+      return new Set(
+        Array.from(data).map(
+          (val) => serializeFn({ data: val, depth: actualDepth - 1, seen })
+        )
+      );
+    }
+    seen.add(data);
+    return Object.fromEntries(
+      Object.entries(data).map(
+        ([key, value]) => [
+          key,
+          serializeFn({ data: value, depth: actualDepth - 1, seen })
+        ]
+      )
+    );
+  }
+  return ipc$1;
+}
+var hasRequiredRenderer;
+function requireRenderer() {
+  if (hasRequiredRenderer) return renderer.exports;
+  hasRequiredRenderer = 1;
+  (function(module2) {
+    const Logger = requireLogger();
+    const RendererErrorHandler = requireRendererErrorHandler();
+    const transportConsole = requireConsole$1();
+    const transportIpc = requireIpc$1();
+    if (typeof process === "object" && process.type === "browser") {
+      console.warn(
+        "electron-log/renderer is loaded in the main process. It could cause unexpected behaviour."
+      );
+    }
+    module2.exports = createLogger();
+    module2.exports.Logger = Logger;
+    module2.exports.default = module2.exports;
+    function createLogger() {
+      const logger = new Logger({
+        allowUnknownLevel: true,
+        errorHandler: new RendererErrorHandler(),
+        initializeFn: () => {
+        },
+        logId: "default",
+        transportFactories: {
+          console: transportConsole,
+          ipc: transportIpc
+        },
+        variables: {
+          processType: "renderer"
+        }
+      });
+      logger.errorHandler.setOptions({
+        logFn({ error, errorName, showDialog }) {
+          logger.transports.console({
+            data: [errorName, error].filter(Boolean),
+            level: "error"
+          });
+          logger.transports.ipc({
+            cmd: "errorHandler",
+            error: {
+              cause: error == null ? void 0 : error.cause,
+              code: error == null ? void 0 : error.code,
+              name: error == null ? void 0 : error.name,
+              message: error == null ? void 0 : error.message,
+              stack: error == null ? void 0 : error.stack
+            },
+            errorName,
+            logId: logger.logId,
+            showDialog
+          });
+        }
+      });
+      if (typeof window === "object") {
+        window.addEventListener("message", (event) => {
+          const { cmd, logId, ...message } = event.data || {};
+          const instance = Logger.getInstance({ logId });
+          if (cmd === "message") {
+            instance.processMessage(message, { transports: ["console"] });
+          }
+        });
+      }
+      return new Proxy(logger, {
+        get(target, prop) {
+          if (typeof target[prop] !== "undefined") {
+            return target[prop];
+          }
+          return (...data) => logger.logData(data, { level: prop });
+        }
+      });
+    }
+  })(renderer);
+  return renderer.exports;
+}
+var packageJson;
+var hasRequiredPackageJson;
+function requirePackageJson() {
+  if (hasRequiredPackageJson) return packageJson;
+  hasRequiredPackageJson = 1;
+  const fs = require$$0;
+  const path = require$$2;
+  packageJson = {
+    findAndReadPackageJson,
+    tryReadJsonAt
+  };
+  function findAndReadPackageJson() {
+    return tryReadJsonAt(getMainModulePath()) || tryReadJsonAt(extractPathFromArgs()) || tryReadJsonAt(process.resourcesPath, "app.asar") || tryReadJsonAt(process.resourcesPath, "app") || tryReadJsonAt(process.cwd()) || { name: void 0, version: void 0 };
+  }
+  function tryReadJsonAt(...searchPaths) {
+    if (!searchPaths[0]) {
+      return void 0;
+    }
+    try {
+      const searchPath = path.join(...searchPaths);
+      const fileName = findUp("package.json", searchPath);
+      if (!fileName) {
+        return void 0;
+      }
+      const json = JSON.parse(fs.readFileSync(fileName, "utf8"));
+      const name = (json == null ? void 0 : json.productName) || (json == null ? void 0 : json.name);
+      if (!name || name.toLowerCase() === "electron") {
+        return void 0;
+      }
+      if (name) {
+        return { name, version: json == null ? void 0 : json.version };
+      }
+      return void 0;
+    } catch (e) {
+      return void 0;
+    }
+  }
+  function findUp(fileName, cwd) {
+    let currentPath = cwd;
+    while (true) {
+      const parsedPath = path.parse(currentPath);
+      const root = parsedPath.root;
+      const dir = parsedPath.dir;
+      if (fs.existsSync(path.join(currentPath, fileName))) {
+        return path.resolve(path.join(currentPath, fileName));
+      }
+      if (currentPath === root) {
+        return null;
+      }
+      currentPath = dir;
+    }
+  }
+  function extractPathFromArgs() {
+    const matchedArgs = process.argv.filter((arg) => {
+      return arg.indexOf("--user-data-dir=") === 0;
+    });
+    if (matchedArgs.length === 0 || typeof matchedArgs[0] !== "string") {
+      return null;
+    }
+    const userDataDir = matchedArgs[0];
+    return userDataDir.replace("--user-data-dir=", "");
+  }
+  function getMainModulePath() {
+    var _a;
+    try {
+      return (_a = require.main) == null ? void 0 : _a.filename;
+    } catch {
+      return void 0;
+    }
+  }
+  return packageJson;
+}
+var NodeExternalApi_1;
+var hasRequiredNodeExternalApi;
+function requireNodeExternalApi() {
+  if (hasRequiredNodeExternalApi) return NodeExternalApi_1;
+  hasRequiredNodeExternalApi = 1;
+  const childProcess = require$$0$1;
+  const os = require$$1;
+  const path = require$$2;
+  const packageJson2 = requirePackageJson();
+  class NodeExternalApi {
+    constructor() {
+      __publicField(this, "appName");
+      __publicField(this, "appPackageJson");
+      __publicField(this, "platform", process.platform);
+    }
+    getAppLogPath(appName = this.getAppName()) {
+      if (this.platform === "darwin") {
+        return path.join(this.getSystemPathHome(), "Library/Logs", appName);
+      }
+      return path.join(this.getAppUserDataPath(appName), "logs");
+    }
+    getAppName() {
+      var _a;
+      const appName = this.appName || ((_a = this.getAppPackageJson()) == null ? void 0 : _a.name);
+      if (!appName) {
+        throw new Error(
+          "electron-log can't determine the app name. It tried these methods:\n1. Use `electron.app.name`\n2. Use productName or name from the nearest package.json`\nYou can also set it through log.transports.file.setAppName()"
+        );
+      }
+      return appName;
+    }
+    /**
+     * @private
+     * @returns {undefined}
+     */
+    getAppPackageJson() {
+      if (typeof this.appPackageJson !== "object") {
+        this.appPackageJson = packageJson2.findAndReadPackageJson();
+      }
+      return this.appPackageJson;
+    }
+    getAppUserDataPath(appName = this.getAppName()) {
+      return appName ? path.join(this.getSystemPathAppData(), appName) : void 0;
+    }
+    getAppVersion() {
+      var _a;
+      return (_a = this.getAppPackageJson()) == null ? void 0 : _a.version;
+    }
+    getElectronLogPath() {
+      return this.getAppLogPath();
+    }
+    getMacOsVersion() {
+      const release = Number(os.release().split(".")[0]);
+      if (release <= 19) {
+        return `10.${release - 4}`;
+      }
+      return release - 9;
+    }
+    /**
+     * @protected
+     * @returns {string}
+     */
+    getOsVersion() {
+      let osName = os.type().replace("_", " ");
+      let osVersion = os.release();
+      if (osName === "Darwin") {
+        osName = "macOS";
+        osVersion = this.getMacOsVersion();
+      }
+      return `${osName} ${osVersion}`;
+    }
+    /**
+     * @return {PathVariables}
+     */
+    getPathVariables() {
+      const appName = this.getAppName();
+      const appVersion = this.getAppVersion();
+      const self = this;
+      return {
+        appData: this.getSystemPathAppData(),
+        appName,
+        appVersion,
+        get electronDefaultDir() {
+          return self.getElectronLogPath();
+        },
+        home: this.getSystemPathHome(),
+        libraryDefaultDir: this.getAppLogPath(appName),
+        libraryTemplate: this.getAppLogPath("{appName}"),
+        temp: this.getSystemPathTemp(),
+        userData: this.getAppUserDataPath(appName)
+      };
+    }
+    getSystemPathAppData() {
+      const home = this.getSystemPathHome();
+      switch (this.platform) {
+        case "darwin": {
+          return path.join(home, "Library/Application Support");
+        }
+        case "win32": {
+          return process.env.APPDATA || path.join(home, "AppData/Roaming");
+        }
+        default: {
+          return process.env.XDG_CONFIG_HOME || path.join(home, ".config");
+        }
+      }
+    }
+    getSystemPathHome() {
+      var _a;
+      return ((_a = os.homedir) == null ? void 0 : _a.call(os)) || process.env.HOME;
+    }
+    getSystemPathTemp() {
+      return os.tmpdir();
+    }
+    getVersions() {
+      return {
+        app: `${this.getAppName()} ${this.getAppVersion()}`,
+        electron: void 0,
+        os: this.getOsVersion()
+      };
+    }
+    isDev() {
+      return process.env.NODE_ENV === "development" || process.env.ELECTRON_IS_DEV === "1";
+    }
+    isElectron() {
+      return Boolean(process.versions.electron);
+    }
+    onAppEvent(_eventName, _handler) {
+    }
+    onAppReady(handler) {
+      handler();
+    }
+    onEveryWebContentsEvent(eventName, handler) {
+    }
+    /**
+     * Listen to async messages sent from opposite process
+     * @param {string} channel
+     * @param {function} listener
+     */
+    onIpc(channel, listener) {
+    }
+    onIpcInvoke(channel, listener) {
+    }
+    /**
+     * @param {string} url
+     * @param {Function} [logFunction]
+     */
+    openUrl(url, logFunction = console.error) {
+      const startMap = { darwin: "open", win32: "start", linux: "xdg-open" };
+      const start = startMap[process.platform] || "xdg-open";
+      childProcess.exec(`${start} ${url}`, {}, (err) => {
+        if (err) {
+          logFunction(err);
+        }
+      });
+    }
+    setAppName(appName) {
+      this.appName = appName;
+    }
+    setPlatform(platform) {
+      this.platform = platform;
+    }
+    setPreloadFileForSessions({
+      filePath,
+      // eslint-disable-line no-unused-vars
+      includeFutureSession = true,
+      // eslint-disable-line no-unused-vars
+      getSessions = () => []
+      // eslint-disable-line no-unused-vars
+    }) {
+    }
+    /**
+     * Sent a message to opposite process
+     * @param {string} channel
+     * @param {any} message
+     */
+    sendIpc(channel, message) {
+    }
+    showErrorBox(title, message) {
+    }
+  }
+  NodeExternalApi_1 = NodeExternalApi;
+  return NodeExternalApi_1;
+}
+var ElectronExternalApi_1;
+var hasRequiredElectronExternalApi;
+function requireElectronExternalApi() {
+  if (hasRequiredElectronExternalApi) return ElectronExternalApi_1;
+  hasRequiredElectronExternalApi = 1;
+  const path = require$$2;
+  const NodeExternalApi = requireNodeExternalApi();
+  class ElectronExternalApi extends NodeExternalApi {
+    /**
+     * @param {object} options
+     * @param {typeof Electron} [options.electron]
+     */
+    constructor({ electron } = {}) {
+      super();
+      /**
+       * @type {typeof Electron}
+       */
+      __publicField(this, "electron");
+      this.electron = electron;
+    }
+    getAppName() {
+      var _a, _b;
+      let appName;
+      try {
+        appName = this.appName || ((_a = this.electron.app) == null ? void 0 : _a.name) || ((_b = this.electron.app) == null ? void 0 : _b.getName());
+      } catch {
+      }
+      return appName || super.getAppName();
+    }
+    getAppUserDataPath(appName) {
+      return this.getPath("userData") || super.getAppUserDataPath(appName);
+    }
+    getAppVersion() {
+      var _a;
+      let appVersion;
+      try {
+        appVersion = (_a = this.electron.app) == null ? void 0 : _a.getVersion();
+      } catch {
+      }
+      return appVersion || super.getAppVersion();
+    }
+    getElectronLogPath() {
+      return this.getPath("logs") || super.getElectronLogPath();
+    }
+    /**
+     * @private
+     * @param {any} name
+     * @returns {string|undefined}
+     */
+    getPath(name) {
+      var _a;
+      try {
+        return (_a = this.electron.app) == null ? void 0 : _a.getPath(name);
+      } catch {
+        return void 0;
+      }
+    }
+    getVersions() {
+      return {
+        app: `${this.getAppName()} ${this.getAppVersion()}`,
+        electron: `Electron ${process.versions.electron}`,
+        os: this.getOsVersion()
+      };
+    }
+    getSystemPathAppData() {
+      return this.getPath("appData") || super.getSystemPathAppData();
+    }
+    isDev() {
+      var _a;
+      if (((_a = this.electron.app) == null ? void 0 : _a.isPackaged) !== void 0) {
+        return !this.electron.app.isPackaged;
+      }
+      if (typeof process.execPath === "string") {
+        const execFileName = path.basename(process.execPath).toLowerCase();
+        return execFileName.startsWith("electron");
+      }
+      return super.isDev();
+    }
+    onAppEvent(eventName, handler) {
+      var _a;
+      (_a = this.electron.app) == null ? void 0 : _a.on(eventName, handler);
+      return () => {
+        var _a2;
+        (_a2 = this.electron.app) == null ? void 0 : _a2.off(eventName, handler);
+      };
+    }
+    onAppReady(handler) {
+      var _a, _b, _c;
+      if ((_a = this.electron.app) == null ? void 0 : _a.isReady()) {
+        handler();
+      } else if ((_b = this.electron.app) == null ? void 0 : _b.once) {
+        (_c = this.electron.app) == null ? void 0 : _c.once("ready", handler);
+      } else {
+        handler();
+      }
+    }
+    onEveryWebContentsEvent(eventName, handler) {
+      var _a, _b, _c;
+      (_b = (_a = this.electron.webContents) == null ? void 0 : _a.getAllWebContents()) == null ? void 0 : _b.forEach((webContents) => {
+        webContents.on(eventName, handler);
+      });
+      (_c = this.electron.app) == null ? void 0 : _c.on("web-contents-created", onWebContentsCreated);
+      return () => {
+        var _a2, _b2;
+        (_a2 = this.electron.webContents) == null ? void 0 : _a2.getAllWebContents().forEach((webContents) => {
+          webContents.off(eventName, handler);
+        });
+        (_b2 = this.electron.app) == null ? void 0 : _b2.off("web-contents-created", onWebContentsCreated);
+      };
+      function onWebContentsCreated(_, webContents) {
+        webContents.on(eventName, handler);
+      }
+    }
+    /**
+     * Listen to async messages sent from opposite process
+     * @param {string} channel
+     * @param {function} listener
+     */
+    onIpc(channel, listener) {
+      var _a;
+      (_a = this.electron.ipcMain) == null ? void 0 : _a.on(channel, listener);
+    }
+    onIpcInvoke(channel, listener) {
+      var _a, _b;
+      (_b = (_a = this.electron.ipcMain) == null ? void 0 : _a.handle) == null ? void 0 : _b.call(_a, channel, listener);
+    }
+    /**
+     * @param {string} url
+     * @param {Function} [logFunction]
+     */
+    openUrl(url, logFunction = console.error) {
+      var _a;
+      (_a = this.electron.shell) == null ? void 0 : _a.openExternal(url).catch(logFunction);
+    }
+    setPreloadFileForSessions({
+      filePath,
+      includeFutureSession = true,
+      getSessions = () => {
+        var _a;
+        return [(_a = this.electron.session) == null ? void 0 : _a.defaultSession];
+      }
+    }) {
+      for (const session of getSessions().filter(Boolean)) {
+        setPreload(session);
+      }
+      if (includeFutureSession) {
+        this.onAppEvent("session-created", (session) => {
+          setPreload(session);
+        });
+      }
+      function setPreload(session) {
+        if (typeof session.registerPreloadScript === "function") {
+          session.registerPreloadScript({
+            filePath,
+            id: "electron-log-preload",
+            type: "frame"
+          });
+        } else {
+          session.setPreloads([...session.getPreloads(), filePath]);
+        }
+      }
+    }
+    /**
+     * Sent a message to opposite process
+     * @param {string} channel
+     * @param {any} message
+     */
+    sendIpc(channel, message) {
+      var _a, _b;
+      (_b = (_a = this.electron.BrowserWindow) == null ? void 0 : _a.getAllWindows()) == null ? void 0 : _b.forEach((wnd) => {
+        var _a2, _b2;
+        if (((_a2 = wnd.webContents) == null ? void 0 : _a2.isDestroyed()) === false && ((_b2 = wnd.webContents) == null ? void 0 : _b2.isCrashed()) === false) {
+          wnd.webContents.send(channel, message);
+        }
+      });
+    }
+    showErrorBox(title, message) {
+      var _a;
+      (_a = this.electron.dialog) == null ? void 0 : _a.showErrorBox(title, message);
+    }
+  }
+  ElectronExternalApi_1 = ElectronExternalApi;
+  return ElectronExternalApi_1;
+}
+var initialize;
+var hasRequiredInitialize;
+function requireInitialize() {
+  if (hasRequiredInitialize) return initialize;
+  hasRequiredInitialize = 1;
+  const fs = require$$0;
+  const os = require$$1;
+  const path = require$$2;
+  const preloadInitializeFn = requireElectronLogPreload();
+  let preloadInitialized = false;
+  let spyConsoleInitialized = false;
+  initialize = {
+    initialize({
+      externalApi,
+      getSessions,
+      includeFutureSession,
+      logger,
+      preload = true,
+      spyRendererConsole = false
+    }) {
+      externalApi.onAppReady(() => {
+        try {
+          if (preload) {
+            initializePreload({
+              externalApi,
+              getSessions,
+              includeFutureSession,
+              logger,
+              preloadOption: preload
+            });
+          }
+          if (spyRendererConsole) {
+            initializeSpyRendererConsole({ externalApi, logger });
+          }
+        } catch (err) {
+          logger.warn(err);
+        }
+      });
+    }
+  };
+  function initializePreload({
+    externalApi,
+    getSessions,
+    includeFutureSession,
+    logger,
+    preloadOption
+  }) {
+    let preloadPath = typeof preloadOption === "string" ? preloadOption : void 0;
+    if (preloadInitialized) {
+      logger.warn(new Error("log.initialize({ preload }) already called").stack);
+      return;
+    }
+    preloadInitialized = true;
+    try {
+      preloadPath = path.resolve(
+        __dirname,
+        "../renderer/electron-log-preload.js"
+      );
+    } catch {
+    }
+    if (!preloadPath || !fs.existsSync(preloadPath)) {
+      preloadPath = path.join(
+        externalApi.getAppUserDataPath() || os.tmpdir(),
+        "electron-log-preload.js"
+      );
+      const preloadCode = `
+      try {
+        (${preloadInitializeFn.toString()})(require('electron'));
       } catch(e) {
         console.error(e);
       }
-    `;l.writeFileSync(d,S,"utf8")}n.setPreloadFileForSessions({filePath:d,includeFutureSession:u,getSessions:a})}function t({externalApi:n,logger:a}){if(r){a.warn(new Error("log.initialize({ spyRendererConsole }) already called").stack);return}r=!0;const u=["debug","info","warn","error"];n.onEveryWebContentsEvent("console-message",(p,f,d)=>{a.processMessage({data:[d],level:u[f],variables:{processType:"renderer"}})})}return Y}var Q,xe;function yt(){if(xe)return Q;xe=1;class l{constructor({externalApi:o,logFn:i=void 0,onError:r=void 0,showDialog:e=void 0}={}){h(this,"externalApi");h(this,"isActive",!1);h(this,"logFn");h(this,"onError");h(this,"showDialog",!0);this.createIssue=this.createIssue.bind(this),this.handleError=this.handleError.bind(this),this.handleRejection=this.handleRejection.bind(this),this.setOptions({externalApi:o,logFn:i,onError:r,showDialog:e}),this.startCatching=this.startCatching.bind(this),this.stopCatching=this.stopCatching.bind(this)}handle(o,{logFn:i=this.logFn,onError:r=this.onError,processType:e="browser",showDialog:t=this.showDialog,errorName:n=""}={}){var a;o=c(o);try{if(typeof r=="function"){const u=((a=this.externalApi)==null?void 0:a.getVersions())||{},p=this.createIssue;if(r({createIssue:p,error:o,errorName:n,processType:e,versions:u})===!1)return}n?i(n,o):i(o),t&&!n.includes("rejection")&&this.externalApi&&this.externalApi.showErrorBox(`A JavaScript error occurred in the ${e} process`,o.stack)}catch{console.error(o)}}setOptions({externalApi:o,logFn:i,onError:r,showDialog:e}){typeof o=="object"&&(this.externalApi=o),typeof i=="function"&&(this.logFn=i),typeof r=="function"&&(this.onError=r),typeof e=="boolean"&&(this.showDialog=e)}startCatching({onError:o,showDialog:i}={}){this.isActive||(this.isActive=!0,this.setOptions({onError:o,showDialog:i}),process.on("uncaughtException",this.handleError),process.on("unhandledRejection",this.handleRejection))}stopCatching(){this.isActive=!1,process.removeListener("uncaughtException",this.handleError),process.removeListener("unhandledRejection",this.handleRejection)}createIssue(o,i){var r;(r=this.externalApi)==null||r.openUrl(`${o}?${new URLSearchParams(i).toString()}`)}handleError(o){this.handle(o,{errorName:"Unhandled"})}handleRejection(o){const i=o instanceof Error?o:new Error(JSON.stringify(o));this.handle(i,{errorName:"Unhandled rejection"})}}function c(s){if(s instanceof Error)return s;if(s&&typeof s=="object"){if(s.message)return Object.assign(new Error(s.message),s);try{return new Error(JSON.stringify(s))}catch(o){return new Error(`Couldn't normalize error ${String(s)}: ${o}`)}}return new Error(`Can't normalize error ${String(s)}`)}return Q=l,Q}var X,Pe;function mt(){if(Pe)return X;Pe=1;class l{constructor(s={}){h(this,"disposers",[]);h(this,"format","{eventSource}#{eventName}:");h(this,"formatters",{app:{"certificate-error":({args:s})=>this.arrayToObject(s.slice(1,4),["url","error","certificate"]),"child-process-gone":({args:s})=>s.length===1?s[0]:s,"render-process-gone":({args:[s,o]})=>o&&typeof o=="object"?{...o,...this.getWebContentsDetails(s)}:[]},webContents:{"console-message":({args:[s,o,i,r]})=>{if(!(s<3))return{message:o,source:`${r}:${i}`}},"did-fail-load":({args:s})=>this.arrayToObject(s,["errorCode","errorDescription","validatedURL","isMainFrame","frameProcessId","frameRoutingId"]),"did-fail-provisional-load":({args:s})=>this.arrayToObject(s,["errorCode","errorDescription","validatedURL","isMainFrame","frameProcessId","frameRoutingId"]),"plugin-crashed":({args:s})=>this.arrayToObject(s,["name","version"]),"preload-error":({args:s})=>this.arrayToObject(s,["preloadPath","error"])}});h(this,"events",{app:{"certificate-error":!0,"child-process-gone":!0,"render-process-gone":!0},webContents:{"did-fail-load":!0,"did-fail-provisional-load":!0,"plugin-crashed":!0,"preload-error":!0,unresponsive:!0}});h(this,"externalApi");h(this,"level","error");h(this,"scope","");this.setOptions(s)}setOptions({events:s,externalApi:o,level:i,logger:r,format:e,formatters:t,scope:n}){typeof s=="object"&&(this.events=s),typeof o=="object"&&(this.externalApi=o),typeof i=="string"&&(this.level=i),typeof r=="object"&&(this.logger=r),(typeof e=="string"||typeof e=="function")&&(this.format=e),typeof t=="object"&&(this.formatters=t),typeof n=="string"&&(this.scope=n)}startLogging(s={}){this.setOptions(s),this.disposeListeners();for(const o of this.getEventNames(this.events.app))this.disposers.push(this.externalApi.onAppEvent(o,(...i)=>{this.handleEvent({eventSource:"app",eventName:o,handlerArgs:i})}));for(const o of this.getEventNames(this.events.webContents))this.disposers.push(this.externalApi.onEveryWebContentsEvent(o,(...i)=>{this.handleEvent({eventSource:"webContents",eventName:o,handlerArgs:i})}))}stopLogging(){this.disposeListeners()}arrayToObject(s,o){const i={};return o.forEach((r,e)=>{i[r]=s[e]}),s.length>o.length&&(i.unknownArgs=s.slice(o.length)),i}disposeListeners(){this.disposers.forEach(s=>s()),this.disposers=[]}formatEventLog({eventName:s,eventSource:o,handlerArgs:i}){var p;const[r,...e]=i;if(typeof this.format=="function")return this.format({args:e,event:r,eventName:s,eventSource:o});const t=(p=this.formatters[o])==null?void 0:p[s];let n=e;if(typeof t=="function"&&(n=t({args:e,event:r,eventName:s,eventSource:o})),!n)return;const a={};return Array.isArray(n)?a.args=n:typeof n=="object"&&Object.assign(a,n),o==="webContents"&&Object.assign(a,this.getWebContentsDetails(r==null?void 0:r.sender)),[this.format.replace("{eventSource}",o==="app"?"App":"WebContents").replace("{eventName}",s),a]}getEventNames(s){return!s||typeof s!="object"?[]:Object.entries(s).filter(([o,i])=>i).map(([o])=>o)}getWebContentsDetails(s){if(!(s!=null&&s.loadURL))return{};try{return{webContents:{id:s.id,url:s.getURL()}}}catch{return{}}}handleEvent({eventName:s,eventSource:o,handlerArgs:i}){var e;const r=this.formatEventLog({eventName:s,eventSource:o,handlerArgs:i});if(r){const t=this.scope?this.logger.scope(this.scope):this.logger;(e=t==null?void 0:t[this.level])==null||e.call(t,...r)}}}return X=l,X}var Z,Fe;function Ve(){if(Fe)return Z;Fe=1;const{transform:l}=F();Z={concatFirstStringElements:c,formatScope:o,formatText:r,formatVariables:i,timeZoneFromOffset:s,format({message:e,logger:t,transport:n,data:a=e==null?void 0:e.data}){switch(typeof n.format){case"string":return l({message:e,logger:t,transforms:[i,o,r],transport:n,initialData:[n.format,...a]});case"function":return n.format({data:a,level:(e==null?void 0:e.level)||"info",logger:t,message:e,transport:n});default:return a}}};function c({data:e}){return typeof e[0]!="string"||typeof e[1]!="string"||e[0].match(/%[1cdfiOos]/)?e:[`${e[0]} ${e[1]}`,...e.slice(2)]}function s(e){const t=Math.abs(e),n=e>0?"-":"+",a=Math.floor(t/60).toString().padStart(2,"0"),u=(t%60).toString().padStart(2,"0");return`${n}${a}:${u}`}function o({data:e,logger:t,message:n}){const{defaultLabel:a,labelLength:u}=(t==null?void 0:t.scope)||{},p=e[0];let f=n.scope;f||(f=a);let d;return f===""?d=u>0?"".padEnd(u+3):"":typeof f=="string"?d=` (${f})`.padEnd(u+3):d="",e[0]=p.replace("{scope}",d),e}function i({data:e,message:t}){let n=e[0];if(typeof n!="string")return e;n=n.replace("{level}]",`${t.level}]`.padEnd(6," "));const a=t.date||new Date;return e[0]=n.replace(/\{(\w+)}/g,(u,p)=>{var f;switch(p){case"level":return t.level||"info";case"logId":return t.logId;case"y":return a.getFullYear().toString(10);case"m":return(a.getMonth()+1).toString(10).padStart(2,"0");case"d":return a.getDate().toString(10).padStart(2,"0");case"h":return a.getHours().toString(10).padStart(2,"0");case"i":return a.getMinutes().toString(10).padStart(2,"0");case"s":return a.getSeconds().toString(10).padStart(2,"0");case"ms":return a.getMilliseconds().toString(10).padStart(3,"0");case"z":return s(a.getTimezoneOffset());case"iso":return a.toISOString();default:return((f=t.variables)==null?void 0:f[p])||u}}).trim(),e}function r({data:e}){const t=e[0];if(typeof t!="string")return e;if(t.lastIndexOf("{text}")===t.length-6)return e[0]=t.replace(/\s?{text}/,""),e[0]===""&&e.shift(),e;const a=t.split("{text}");let u=[];return a[0]!==""&&u.push(a[0]),u=u.concat(e.slice(1)),a[1]!==""&&u.push(a[1]),u}return Z}var ee={exports:{}},De;function q(){return De||(De=1,function(l){const c=tt;l.exports={serialize:o,maxDepth({data:i,transport:r,depth:e=(r==null?void 0:r.depth)??6}){if(!i)return i;if(e<1)return Array.isArray(i)?"[array]":typeof i=="object"&&i?"[object]":i;if(Array.isArray(i))return i.map(n=>l.exports.maxDepth({data:n,depth:e-1}));if(typeof i!="object"||i&&typeof i.toISOString=="function")return i;if(i===null)return null;if(i instanceof Error)return i;const t={};for(const n in i)Object.prototype.hasOwnProperty.call(i,n)&&(t[n]=l.exports.maxDepth({data:i[n],depth:e-1}));return t},toJSON({data:i}){return JSON.parse(JSON.stringify(i,s()))},toString({data:i,transport:r}){const e=(r==null?void 0:r.inspectOptions)||{},t=i.map(n=>{if(n!==void 0)try{const a=JSON.stringify(n,s(),"  ");return a===void 0?void 0:JSON.parse(a)}catch{return n}});return c.formatWithOptions(e,...t)}};function s(i={}){const r=new WeakSet;return function(e,t){if(typeof t=="object"&&t!==null){if(r.has(t))return;r.add(t)}return o(e,t,i)}}function o(i,r,e={}){const t=(e==null?void 0:e.serializeMapAndSet)!==!1;return r instanceof Error?r.stack:r&&(typeof r=="function"?`[function] ${r.toString()}`:r instanceof Date?r.toISOString():t&&r instanceof Map&&Object.fromEntries?Object.fromEntries(r):t&&r instanceof Set&&Array.from?Array.from(r):r)}}(ee)),ee.exports}var te,_e;function fe(){if(_e)return te;_e=1,te={transformStyles:o,applyAnsiStyles({data:i}){return o(i,c,s)},removeStyles({data:i}){return o(i,()=>"")}};const l={unset:"\x1B[0m",black:"\x1B[30m",red:"\x1B[31m",green:"\x1B[32m",yellow:"\x1B[33m",blue:"\x1B[34m",magenta:"\x1B[35m",cyan:"\x1B[36m",white:"\x1B[37m",gray:"\x1B[90m"};function c(i){const r=i.replace(/color:\s*(\w+).*/,"$1").toLowerCase();return l[r]||""}function s(i){return i+l.unset}function o(i,r,e){const t={};return i.reduce((n,a,u,p)=>{if(t[u])return n;if(typeof a=="string"){let f=u,d=!1;a=a.replace(/%[1cdfiOos]/g,S=>{if(f+=1,S!=="%c")return S;const y=p[f];return typeof y=="string"?(t[f]=!0,d=!0,r(y,a)):S}),d&&e&&(a=e(a))}return n.push(a),n},[])}return te}var re,$e;function vt(){if($e)return re;$e=1;const{concatFirstStringElements:l,format:c}=Ve(),{maxDepth:s,toJSON:o}=q(),{applyAnsiStyles:i,removeStyles:r}=fe(),{transform:e}=F(),t={error:console.error,warn:console.warn,info:console.info,verbose:console.info,debug:console.debug,silly:console.debug,log:console.log};re=u;const a=`%c{h}:{i}:{s}.{ms}{scope}%c ${process.platform==="win32"?">":"›"} {text}`;Object.assign(u,{DEFAULT_FORMAT:a});function u(y){return Object.assign(g,{colorMap:{error:"red",warn:"yellow",info:"cyan",verbose:"unset",debug:"gray",silly:"gray",default:"unset"},format:a,level:"silly",transforms:[p,c,d,l,s,o],useStyles:process.env.FORCE_STYLES,writeFn({message:b}){(t[b.level]||t.info)(...b.data)}});function g(b){const O=e({logger:y,message:b,transport:g});g.writeFn({message:{...b,data:O}})}}function p({data:y,message:g,transport:b}){return typeof b.format!="string"||!b.format.includes("%c")?y:[`color:${S(g.level,b)}`,"color:unset",...y]}function f(y,g){if(typeof y=="boolean")return y;const O=g==="error"||g==="warn"?process.stderr:process.stdout;return O&&O.isTTY}function d(y){const{message:g,transport:b}=y;return(f(b.useStyles,g.level)?i:r)(y)}function S(y,g){return g.colorMap[y]||g.colorMap.default}return re}var ne,je;function Ge(){if(je)return ne;je=1;const l=Be,c=P,s=I;class o extends l{constructor({path:t,writeOptions:n={encoding:"utf8",flag:"a",mode:438},writeAsync:a=!1}){super();h(this,"asyncWriteQueue",[]);h(this,"bytesWritten",0);h(this,"hasActiveAsyncWriting",!1);h(this,"path",null);h(this,"initialSize");h(this,"writeOptions",null);h(this,"writeAsync",!1);this.path=t,this.writeOptions=n,this.writeAsync=a}get size(){return this.getSize()}clear(){try{return c.writeFileSync(this.path,"",{mode:this.writeOptions.mode,flag:"w"}),this.reset(),!0}catch(t){return t.code==="ENOENT"?!0:(this.emit("error",t,this),!1)}}crop(t){try{const n=i(this.path,t||4096);this.clear(),this.writeLine(`[log cropped]${s.EOL}${n}`)}catch(n){this.emit("error",new Error(`Couldn't crop file ${this.path}. ${n.message}`),this)}}getSize(){if(this.initialSize===void 0)try{const t=c.statSync(this.path);this.initialSize=t.size}catch{this.initialSize=0}return this.initialSize+this.bytesWritten}increaseBytesWrittenCounter(t){this.bytesWritten+=Buffer.byteLength(t,this.writeOptions.encoding)}isNull(){return!1}nextAsyncWrite(){const t=this;if(this.hasActiveAsyncWriting||this.asyncWriteQueue.length===0)return;const n=this.asyncWriteQueue.join("");this.asyncWriteQueue=[],this.hasActiveAsyncWriting=!0,c.writeFile(this.path,n,this.writeOptions,a=>{t.hasActiveAsyncWriting=!1,a?t.emit("error",new Error(`Couldn't write to ${t.path}. ${a.message}`),this):t.increaseBytesWrittenCounter(n),t.nextAsyncWrite()})}reset(){this.initialSize=void 0,this.bytesWritten=0}toString(){return this.path}writeLine(t){if(t+=s.EOL,this.writeAsync){this.asyncWriteQueue.push(t),this.nextAsyncWrite();return}try{c.writeFileSync(this.path,t,this.writeOptions),this.increaseBytesWrittenCounter(t)}catch(n){this.emit("error",new Error(`Couldn't write to ${this.path}. ${n.message}`),this)}}}ne=o;function i(r,e){const t=Buffer.alloc(e),n=c.statSync(r),a=Math.min(n.size,e),u=Math.max(0,n.size-e),p=c.openSync(r,"r"),f=c.readSync(p,t,0,a,u);return c.closeSync(p),t.toString("utf8",0,f)}return ne}var se,Re;function wt(){if(Re)return se;Re=1;const l=Ge();class c extends l{clear(){}crop(){}getSize(){return 0}isNull(){return!0}writeLine(){}}return se=c,se}var oe,Ne;function bt(){if(Ne)return oe;Ne=1;const l=Be,c=P,s=x,o=Ge(),i=wt();class r extends l{constructor(){super();h(this,"store",{});this.emitError=this.emitError.bind(this)}provide({filePath:n,writeOptions:a={},writeAsync:u=!1}){let p;try{if(n=s.resolve(n),this.store[n])return this.store[n];p=this.createFile({filePath:n,writeOptions:a,writeAsync:u})}catch(f){p=new i({path:n}),this.emitError(f,p)}return p.on("error",this.emitError),this.store[n]=p,p}createFile({filePath:n,writeOptions:a,writeAsync:u}){return this.testFileWriting({filePath:n,writeOptions:a}),new o({path:n,writeOptions:a,writeAsync:u})}emitError(n,a){this.emit("error",n,a)}testFileWriting({filePath:n,writeOptions:a}){c.mkdirSync(s.dirname(n),{recursive:!0}),c.writeFileSync(n,"",{flag:"a",mode:a.mode})}}return oe=r,oe}var ie,Ie;function St(){if(Ie)return ie;Ie=1;const l=P,c=I,s=x,o=bt(),{transform:i}=F(),{removeStyles:r}=fe(),{format:e,concatFirstStringElements:t}=Ve(),{toString:n}=q();ie=u;const a=new o;function u(f,{registry:d=a,externalApi:S}={}){let y;return d.listenerCount("error")<1&&d.on("error",(w,v)=>{O(`Can't write to ${v}`,w)}),Object.assign(g,{fileName:p(f.variables.processType),format:"[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}",getFile:C,inspectOptions:{depth:5},level:"silly",maxSize:1024**2,readAllLogs:Qe,sync:!0,transforms:[r,e,t,n],writeOptions:{flag:"a",mode:438,encoding:"utf8"},archiveLogFn(w){const v=w.toString(),A=s.parse(v);try{l.renameSync(v,s.join(A.dir,`${A.name}.old${A.ext}`))}catch(D){O("Could not rotate log",D);const Xe=Math.round(g.maxSize/4);w.crop(Math.min(Xe,256*1024))}},resolvePathFn(w){return s.join(w.libraryDefaultDir,w.fileName)},setAppName(w){f.dependencies.externalApi.setAppName(w)}});function g(w){const v=C(w);g.maxSize>0&&v.size>g.maxSize&&(g.archiveLogFn(v),v.reset());const D=i({logger:f,message:w,transport:g});v.writeLine(D)}function b(){y||(y=Object.create(Object.prototype,{...Object.getOwnPropertyDescriptors(S.getPathVariables()),fileName:{get(){return g.fileName},enumerable:!0}}),typeof g.archiveLog=="function"&&(g.archiveLogFn=g.archiveLog,O("archiveLog is deprecated. Use archiveLogFn instead")),typeof g.resolvePath=="function"&&(g.resolvePathFn=g.resolvePath,O("resolvePath is deprecated. Use resolvePathFn instead")))}function O(w,v=null,A="error"){const D=[`electron-log.transports.file: ${w}`];v&&D.push(v),f.transports.console({data:D,date:new Date,level:A})}function C(w){b();const v=g.resolvePathFn(y,w);return d.provide({filePath:v,writeAsync:!g.sync,writeOptions:g.writeOptions})}function Qe({fileFilter:w=v=>v.endsWith(".log")}={}){b();const v=s.dirname(g.resolvePathFn(y));return l.existsSync(v)?l.readdirSync(v).map(A=>s.join(v,A)).filter(w).map(A=>{try{return{path:A,lines:l.readFileSync(A,"utf8").split(c.EOL)}}catch{return null}}).filter(Boolean):[]}}function p(f=process.type){switch(f){case"renderer":return"renderer.log";case"worker":return"worker.log";default:return"main.log"}}return ie}var ae,qe;function Et(){if(qe)return ae;qe=1;const{maxDepth:l,toJSON:c}=q(),{transform:s}=F();ae=o;function o(i,{externalApi:r}){return Object.assign(e,{depth:3,eventId:"__ELECTRON_LOG_IPC__",level:i.isDev?"silly":!1,transforms:[c,l]}),r!=null&&r.isElectron()?e:void 0;function e(t){var n;((n=t==null?void 0:t.variables)==null?void 0:n.processType)!=="renderer"&&(r==null||r.sendIpc(e.eventId,{...t,data:s({logger:i,message:t,transport:e})}))}}return ae}var ce,Ce;function Ot(){if(Ce)return ce;Ce=1;const l=rt,c=nt,{transform:s}=F(),{removeStyles:o}=fe(),{toJSON:i,maxDepth:r}=q();ce=e;function e(t){return Object.assign(n,{client:{name:"electron-application"},depth:6,level:!1,requestOptions:{},transforms:[o,i,r],makeBodyFn({message:a}){return JSON.stringify({client:n.client,data:a.data,date:a.date.getTime(),level:a.level,scope:a.scope,variables:a.variables})},processErrorFn({error:a}){t.processMessage({data:[`electron-log: can't POST ${n.url}`,a],level:"warn"},{transports:["console","file"]})},sendRequestFn({serverUrl:a,requestOptions:u,body:p}){const d=(a.startsWith("https:")?c:l).request(a,{method:"POST",...u,headers:{"Content-Type":"application/json","Content-Length":p.length,...u.headers}});return d.write(p),d.end(),d}});function n(a){if(!n.url)return;const u=n.makeBodyFn({logger:t,message:{...a,data:s({logger:t,message:a,transport:n})},transport:n}),p=n.sendRequestFn({serverUrl:n.url,requestOptions:n.requestOptions,body:Buffer.from(u,"utf8")});p.on("error",f=>n.processErrorFn({error:f,logger:t,message:a,request:p,transport:n}))}}return ce}var le,Te;function Ke(){if(Te)return le;Te=1;const l=He(),c=yt(),s=mt(),o=vt(),i=St(),r=Et(),e=Ot();le=t;function t({dependencies:n,initializeFn:a}){var p;const u=new l({dependencies:n,errorHandler:new c,eventLogger:new s,initializeFn:a,isDev:(p=n.externalApi)==null?void 0:p.isDev(),logId:"default",transportFactories:{console:o,file:i,ipc:r,remote:e},variables:{processType:"main"}});return u.default=u,u.Logger=l,u.processInternalErrorFn=f=>{u.transports.console.writeFn({message:{data:["Unhandled electron-log error",f],level:"error"}})},u}return le}var ue,Me;function At(){if(Me)return ue;Me=1;const l=m,c=dt(),{initialize:s}=gt(),o=Ke(),i=new c({electron:l}),r=o({dependencies:{externalApi:i},initializeFn:s});ue=r,i.onIpc("__ELECTRON_LOG__",(t,n)=>{n.scope&&r.Logger.getInstance(n).scope(n.scope);const a=new Date(n.date);e({...n,date:a.getTime()?a:new Date})}),i.onIpcInvoke("__ELECTRON_LOG__",(t,{cmd:n="",logId:a})=>{switch(n){case"getOptions":return{levels:r.Logger.getInstance({logId:a}).levels,logId:a};default:return e({data:[`Unknown cmd '${n}'`],level:"error"}),{}}});function e(t){var n;(n=r.Logger.getInstance(t))==null||n.processMessage(t)}return ue}var pe,ke;function Lt(){if(ke)return pe;ke=1;const l=Je(),c=Ke(),s=new l;return pe=c({dependencies:{externalApi:s}}),pe}const xt=typeof process>"u"||process.type==="renderer"||process.type==="worker",Pt=typeof process=="object"&&process.type==="browser";xt?(Ue(),N.exports=ft()):Pt?N.exports=At():N.exports=Lt();var Ft=N.exports;const E=it(Ft),Dt=["xlsx","xls","csv","docx","pdf","png","jpg","jpeg","webp"];function _t(l){m.ipcMain.handle("dialog:select-files",async()=>{const c=await m.dialog.showOpenDialog({title:"Selecciona archivos para analizar",properties:["openFile","multiSelections"],filters:[{name:"Archivos soportados",extensions:Dt}]});return c.canceled?[]:c.filePaths})}const R="excel-analyzer";function $t(l){m.ipcMain.handle("config:save",async(c,s)=>{await j.setPassword(R,"ai_provider",s.aiProvider),s.apiKey&&await j.setPassword(R,"api_key",s.apiKey),s.ollamaBaseUrl&&await j.setPassword(R,"ollama_url",s.ollamaBaseUrl),await fetch(`http://127.0.0.1:${l}/config/save`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ai_provider:s.aiProvider,api_key:s.apiKey,ollama_url:s.ollamaBaseUrl})})}),m.ipcMain.handle("config:get",async()=>{const c=await j.getPassword(R,"ai_provider");return c?{aiProvider:c,configuredAt:new Date().toISOString()}:null}),m.ipcMain.handle("config:test",async()=>{try{return await(await fetch(`http://127.0.0.1:${l}/config/test`)).json()}catch{return{ok:!1,error:"No se pudo conectar con el motor de IA."}}})}function jt(l,c){m.ipcMain.handle("analysis:start",async(s,o)=>{const e=(await(await fetch(`http://127.0.0.1:${l}/analysis/start`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({file_paths:o.filePaths,user_prompt:o.userPrompt,output_format:o.outputFormat})})).json()).session_id,t=new EventSource(`http://127.0.0.1:${l}/analysis/progress/${e}`);return t.onmessage=n=>{const a=JSON.parse(n.data);c==null||c.webContents.send("analysis:progress",a),(a.stage==="done"||a.stage==="error")&&t.close()},t.onerror=()=>{t.close()},{sessionId:e}}),m.ipcMain.handle("analysis:result",async(s,o)=>(await fetch(`http://127.0.0.1:${l}/analysis/result/${o}`)).json())}const Rt={word:{ext:"docx",label:"Documento Word"},pptx:{ext:"pptx",label:"Presentación PowerPoint"}};function Nt(l){m.ipcMain.handle("export:save",async(c,s)=>{const o=Rt[s.fileType];if(!o)return{savedPath:""};const{filePath:i}=await m.dialog.showSaveDialog({title:`Guardar ${o.label}`,defaultPath:`analisis_${Date.now()}.${o.ext}`,filters:[{name:o.label,extensions:[o.ext]}]});if(!i)return{savedPath:""};const r=await fetch(`http://127.0.0.1:${l}/export/download`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:s.sessionId,file_type:s.fileType})});if(!r.ok||!r.body)return{savedPath:""};const e=P.createWriteStream(i);return await st.pipeline(ot.Readable.fromWeb(r.body),e),{savedPath:i}})}function It(){return Math.floor(Math.random()*16384)+49152}E.initialize();E.transports.file.level="info";let L=null,_=null,$=8765;async function qt(){var i,r;if(!m.app.isPackaged){const e=parseInt(process.env.VITE_BACKEND_PORT??"8765",10);return $=e,E.info(`Modo dev — usando backend en puerto ${e}`),await ze(e),e}const c=It();$=c;const s=process.platform==="win32"?"excel-analyzer-backend.exe":"excel-analyzer-backend",o=x.join(process.resourcesPath,"backend",s);if(E.info(`Backend cmd: ${o}`),process.platform!=="win32")if(P.existsSync(o))try{P.chmodSync(o,493)}catch{}else throw new Error(`Ejecutable no encontrado: ${o}`);return E.info(`Iniciando backend en puerto ${c}`),_=We.spawn(o,[],{env:{...process.env,BACKEND_PORT:String(c),BACKEND_HOST:"127.0.0.1"},stdio:["ignore","pipe","pipe"]}),(i=_.stdout)==null||i.on("data",e=>{E.info(`[backend] ${e.toString().trim()}`)}),(r=_.stderr)==null||r.on("data",e=>{E.info(`[backend:err] ${e.toString().trim()}`)}),_.on("exit",e=>{E.warn(`Backend terminó con código: ${e}`)}),await ze(c),c}async function ze(l,c=120){for(let s=0;s<c;s++){try{if((await fetch(`http://127.0.0.1:${l}/health`)).ok){E.info("Backend listo");return}}catch{}await new Promise(o=>setTimeout(o,500))}throw new Error("El backend no respondió en el tiempo esperado")}function Ye(){L=new m.BrowserWindow({width:1100,height:750,minWidth:800,minHeight:600,webPreferences:{nodeIntegration:!1,contextIsolation:!0,sandbox:!0,preload:x.join(__dirname,"preload.js"),webSecurity:!0,allowRunningInsecureContent:!1},titleBarStyle:process.platform==="darwin"?"hiddenInset":"default",show:!1}),L.once("ready-to-show",()=>{L==null||L.show()}),m.app.isPackaged?L.loadFile(x.join(__dirname,"../dist/index.html")):(L.loadURL("http://localhost:5173"),L.webContents.openDevTools())}m.app.whenReady().then(async()=>{try{await qt()}catch(l){E.error("Error iniciando backend:",l),m.dialog.showErrorBox("Error de inicio",`No se pudo iniciar el motor de análisis.
+    `;
+      fs.writeFileSync(preloadPath, preloadCode, "utf8");
+    }
+    externalApi.setPreloadFileForSessions({
+      filePath: preloadPath,
+      includeFutureSession,
+      getSessions
+    });
+  }
+  function initializeSpyRendererConsole({ externalApi, logger }) {
+    if (spyConsoleInitialized) {
+      logger.warn(
+        new Error("log.initialize({ spyRendererConsole }) already called").stack
+      );
+      return;
+    }
+    spyConsoleInitialized = true;
+    const levels = ["debug", "info", "warn", "error"];
+    externalApi.onEveryWebContentsEvent(
+      "console-message",
+      (event, level, message) => {
+        logger.processMessage({
+          data: [message],
+          level: levels[level],
+          variables: { processType: "renderer" }
+        });
+      }
+    );
+  }
+  return initialize;
+}
+var ErrorHandler_1;
+var hasRequiredErrorHandler;
+function requireErrorHandler() {
+  if (hasRequiredErrorHandler) return ErrorHandler_1;
+  hasRequiredErrorHandler = 1;
+  class ErrorHandler {
+    constructor({
+      externalApi,
+      logFn = void 0,
+      onError = void 0,
+      showDialog = void 0
+    } = {}) {
+      __publicField(this, "externalApi");
+      __publicField(this, "isActive", false);
+      __publicField(this, "logFn");
+      __publicField(this, "onError");
+      __publicField(this, "showDialog", true);
+      this.createIssue = this.createIssue.bind(this);
+      this.handleError = this.handleError.bind(this);
+      this.handleRejection = this.handleRejection.bind(this);
+      this.setOptions({ externalApi, logFn, onError, showDialog });
+      this.startCatching = this.startCatching.bind(this);
+      this.stopCatching = this.stopCatching.bind(this);
+    }
+    handle(error, {
+      logFn = this.logFn,
+      onError = this.onError,
+      processType = "browser",
+      showDialog = this.showDialog,
+      errorName = ""
+    } = {}) {
+      var _a;
+      error = normalizeError(error);
+      try {
+        if (typeof onError === "function") {
+          const versions = ((_a = this.externalApi) == null ? void 0 : _a.getVersions()) || {};
+          const createIssue = this.createIssue;
+          const result = onError({
+            createIssue,
+            error,
+            errorName,
+            processType,
+            versions
+          });
+          if (result === false) {
+            return;
+          }
+        }
+        errorName ? logFn(errorName, error) : logFn(error);
+        if (showDialog && !errorName.includes("rejection") && this.externalApi) {
+          this.externalApi.showErrorBox(
+            `A JavaScript error occurred in the ${processType} process`,
+            error.stack
+          );
+        }
+      } catch {
+        console.error(error);
+      }
+    }
+    setOptions({ externalApi, logFn, onError, showDialog }) {
+      if (typeof externalApi === "object") {
+        this.externalApi = externalApi;
+      }
+      if (typeof logFn === "function") {
+        this.logFn = logFn;
+      }
+      if (typeof onError === "function") {
+        this.onError = onError;
+      }
+      if (typeof showDialog === "boolean") {
+        this.showDialog = showDialog;
+      }
+    }
+    startCatching({ onError, showDialog } = {}) {
+      if (this.isActive) {
+        return;
+      }
+      this.isActive = true;
+      this.setOptions({ onError, showDialog });
+      process.on("uncaughtException", this.handleError);
+      process.on("unhandledRejection", this.handleRejection);
+    }
+    stopCatching() {
+      this.isActive = false;
+      process.removeListener("uncaughtException", this.handleError);
+      process.removeListener("unhandledRejection", this.handleRejection);
+    }
+    createIssue(pageUrl, queryParams) {
+      var _a;
+      (_a = this.externalApi) == null ? void 0 : _a.openUrl(
+        `${pageUrl}?${new URLSearchParams(queryParams).toString()}`
+      );
+    }
+    handleError(error) {
+      this.handle(error, { errorName: "Unhandled" });
+    }
+    handleRejection(reason) {
+      const error = reason instanceof Error ? reason : new Error(JSON.stringify(reason));
+      this.handle(error, { errorName: "Unhandled rejection" });
+    }
+  }
+  function normalizeError(e) {
+    if (e instanceof Error) {
+      return e;
+    }
+    if (e && typeof e === "object") {
+      if (e.message) {
+        return Object.assign(new Error(e.message), e);
+      }
+      try {
+        return new Error(JSON.stringify(e));
+      } catch (serErr) {
+        return new Error(`Couldn't normalize error ${String(e)}: ${serErr}`);
+      }
+    }
+    return new Error(`Can't normalize error ${String(e)}`);
+  }
+  ErrorHandler_1 = ErrorHandler;
+  return ErrorHandler_1;
+}
+var EventLogger_1;
+var hasRequiredEventLogger;
+function requireEventLogger() {
+  if (hasRequiredEventLogger) return EventLogger_1;
+  hasRequiredEventLogger = 1;
+  class EventLogger {
+    constructor(options = {}) {
+      __publicField(this, "disposers", []);
+      __publicField(this, "format", "{eventSource}#{eventName}:");
+      __publicField(this, "formatters", {
+        app: {
+          "certificate-error": ({ args }) => {
+            return this.arrayToObject(args.slice(1, 4), [
+              "url",
+              "error",
+              "certificate"
+            ]);
+          },
+          "child-process-gone": ({ args }) => {
+            return args.length === 1 ? args[0] : args;
+          },
+          "render-process-gone": ({ args: [webContents, details] }) => {
+            return details && typeof details === "object" ? { ...details, ...this.getWebContentsDetails(webContents) } : [];
+          }
+        },
+        webContents: {
+          "console-message": ({ args: [level, message, line, sourceId] }) => {
+            if (level < 3) {
+              return void 0;
+            }
+            return { message, source: `${sourceId}:${line}` };
+          },
+          "did-fail-load": ({ args }) => {
+            return this.arrayToObject(args, [
+              "errorCode",
+              "errorDescription",
+              "validatedURL",
+              "isMainFrame",
+              "frameProcessId",
+              "frameRoutingId"
+            ]);
+          },
+          "did-fail-provisional-load": ({ args }) => {
+            return this.arrayToObject(args, [
+              "errorCode",
+              "errorDescription",
+              "validatedURL",
+              "isMainFrame",
+              "frameProcessId",
+              "frameRoutingId"
+            ]);
+          },
+          "plugin-crashed": ({ args }) => {
+            return this.arrayToObject(args, ["name", "version"]);
+          },
+          "preload-error": ({ args }) => {
+            return this.arrayToObject(args, ["preloadPath", "error"]);
+          }
+        }
+      });
+      __publicField(this, "events", {
+        app: {
+          "certificate-error": true,
+          "child-process-gone": true,
+          "render-process-gone": true
+        },
+        webContents: {
+          // 'console-message': true,
+          "did-fail-load": true,
+          "did-fail-provisional-load": true,
+          "plugin-crashed": true,
+          "preload-error": true,
+          "unresponsive": true
+        }
+      });
+      __publicField(this, "externalApi");
+      __publicField(this, "level", "error");
+      __publicField(this, "scope", "");
+      this.setOptions(options);
+    }
+    setOptions({
+      events,
+      externalApi,
+      level,
+      logger,
+      format: format2,
+      formatters,
+      scope: scope2
+    }) {
+      if (typeof events === "object") {
+        this.events = events;
+      }
+      if (typeof externalApi === "object") {
+        this.externalApi = externalApi;
+      }
+      if (typeof level === "string") {
+        this.level = level;
+      }
+      if (typeof logger === "object") {
+        this.logger = logger;
+      }
+      if (typeof format2 === "string" || typeof format2 === "function") {
+        this.format = format2;
+      }
+      if (typeof formatters === "object") {
+        this.formatters = formatters;
+      }
+      if (typeof scope2 === "string") {
+        this.scope = scope2;
+      }
+    }
+    startLogging(options = {}) {
+      this.setOptions(options);
+      this.disposeListeners();
+      for (const eventName of this.getEventNames(this.events.app)) {
+        this.disposers.push(
+          this.externalApi.onAppEvent(eventName, (...handlerArgs) => {
+            this.handleEvent({ eventSource: "app", eventName, handlerArgs });
+          })
+        );
+      }
+      for (const eventName of this.getEventNames(this.events.webContents)) {
+        this.disposers.push(
+          this.externalApi.onEveryWebContentsEvent(
+            eventName,
+            (...handlerArgs) => {
+              this.handleEvent(
+                { eventSource: "webContents", eventName, handlerArgs }
+              );
+            }
+          )
+        );
+      }
+    }
+    stopLogging() {
+      this.disposeListeners();
+    }
+    arrayToObject(array, fieldNames) {
+      const obj = {};
+      fieldNames.forEach((fieldName, index) => {
+        obj[fieldName] = array[index];
+      });
+      if (array.length > fieldNames.length) {
+        obj.unknownArgs = array.slice(fieldNames.length);
+      }
+      return obj;
+    }
+    disposeListeners() {
+      this.disposers.forEach((disposer) => disposer());
+      this.disposers = [];
+    }
+    formatEventLog({ eventName, eventSource, handlerArgs }) {
+      var _a;
+      const [event, ...args] = handlerArgs;
+      if (typeof this.format === "function") {
+        return this.format({ args, event, eventName, eventSource });
+      }
+      const formatter = (_a = this.formatters[eventSource]) == null ? void 0 : _a[eventName];
+      let formattedArgs = args;
+      if (typeof formatter === "function") {
+        formattedArgs = formatter({ args, event, eventName, eventSource });
+      }
+      if (!formattedArgs) {
+        return void 0;
+      }
+      const eventData = {};
+      if (Array.isArray(formattedArgs)) {
+        eventData.args = formattedArgs;
+      } else if (typeof formattedArgs === "object") {
+        Object.assign(eventData, formattedArgs);
+      }
+      if (eventSource === "webContents") {
+        Object.assign(eventData, this.getWebContentsDetails(event == null ? void 0 : event.sender));
+      }
+      const title = this.format.replace("{eventSource}", eventSource === "app" ? "App" : "WebContents").replace("{eventName}", eventName);
+      return [title, eventData];
+    }
+    getEventNames(eventMap) {
+      if (!eventMap || typeof eventMap !== "object") {
+        return [];
+      }
+      return Object.entries(eventMap).filter(([_, listen]) => listen).map(([eventName]) => eventName);
+    }
+    getWebContentsDetails(webContents) {
+      if (!(webContents == null ? void 0 : webContents.loadURL)) {
+        return {};
+      }
+      try {
+        return {
+          webContents: {
+            id: webContents.id,
+            url: webContents.getURL()
+          }
+        };
+      } catch {
+        return {};
+      }
+    }
+    handleEvent({ eventName, eventSource, handlerArgs }) {
+      var _a;
+      const log2 = this.formatEventLog({ eventName, eventSource, handlerArgs });
+      if (log2) {
+        const logFns = this.scope ? this.logger.scope(this.scope) : this.logger;
+        (_a = logFns == null ? void 0 : logFns[this.level]) == null ? void 0 : _a.call(logFns, ...log2);
+      }
+    }
+  }
+  EventLogger_1 = EventLogger;
+  return EventLogger_1;
+}
+var format;
+var hasRequiredFormat;
+function requireFormat() {
+  if (hasRequiredFormat) return format;
+  hasRequiredFormat = 1;
+  const { transform } = requireTransform();
+  format = {
+    concatFirstStringElements,
+    formatScope,
+    formatText,
+    formatVariables,
+    timeZoneFromOffset,
+    format({ message, logger, transport, data = message == null ? void 0 : message.data }) {
+      switch (typeof transport.format) {
+        case "string": {
+          return transform({
+            message,
+            logger,
+            transforms: [formatVariables, formatScope, formatText],
+            transport,
+            initialData: [transport.format, ...data]
+          });
+        }
+        case "function": {
+          return transport.format({
+            data,
+            level: (message == null ? void 0 : message.level) || "info",
+            logger,
+            message,
+            transport
+          });
+        }
+        default: {
+          return data;
+        }
+      }
+    }
+  };
+  function concatFirstStringElements({ data }) {
+    if (typeof data[0] !== "string" || typeof data[1] !== "string") {
+      return data;
+    }
+    if (data[0].match(/%[1cdfiOos]/)) {
+      return data;
+    }
+    return [`${data[0]} ${data[1]}`, ...data.slice(2)];
+  }
+  function timeZoneFromOffset(minutesOffset) {
+    const minutesPositive = Math.abs(minutesOffset);
+    const sign = minutesOffset > 0 ? "-" : "+";
+    const hours = Math.floor(minutesPositive / 60).toString().padStart(2, "0");
+    const minutes = (minutesPositive % 60).toString().padStart(2, "0");
+    return `${sign}${hours}:${minutes}`;
+  }
+  function formatScope({ data, logger, message }) {
+    const { defaultLabel, labelLength } = (logger == null ? void 0 : logger.scope) || {};
+    const template = data[0];
+    let label = message.scope;
+    if (!label) {
+      label = defaultLabel;
+    }
+    let scopeText;
+    if (label === "") {
+      scopeText = labelLength > 0 ? "".padEnd(labelLength + 3) : "";
+    } else if (typeof label === "string") {
+      scopeText = ` (${label})`.padEnd(labelLength + 3);
+    } else {
+      scopeText = "";
+    }
+    data[0] = template.replace("{scope}", scopeText);
+    return data;
+  }
+  function formatVariables({ data, message }) {
+    let template = data[0];
+    if (typeof template !== "string") {
+      return data;
+    }
+    template = template.replace("{level}]", `${message.level}]`.padEnd(6, " "));
+    const date = message.date || /* @__PURE__ */ new Date();
+    data[0] = template.replace(/\{(\w+)}/g, (substring, name) => {
+      var _a;
+      switch (name) {
+        case "level":
+          return message.level || "info";
+        case "logId":
+          return message.logId;
+        case "y":
+          return date.getFullYear().toString(10);
+        case "m":
+          return (date.getMonth() + 1).toString(10).padStart(2, "0");
+        case "d":
+          return date.getDate().toString(10).padStart(2, "0");
+        case "h":
+          return date.getHours().toString(10).padStart(2, "0");
+        case "i":
+          return date.getMinutes().toString(10).padStart(2, "0");
+        case "s":
+          return date.getSeconds().toString(10).padStart(2, "0");
+        case "ms":
+          return date.getMilliseconds().toString(10).padStart(3, "0");
+        case "z":
+          return timeZoneFromOffset(date.getTimezoneOffset());
+        case "iso":
+          return date.toISOString();
+        default: {
+          return ((_a = message.variables) == null ? void 0 : _a[name]) || substring;
+        }
+      }
+    }).trim();
+    return data;
+  }
+  function formatText({ data }) {
+    const template = data[0];
+    if (typeof template !== "string") {
+      return data;
+    }
+    const textTplPosition = template.lastIndexOf("{text}");
+    if (textTplPosition === template.length - 6) {
+      data[0] = template.replace(/\s?{text}/, "");
+      if (data[0] === "") {
+        data.shift();
+      }
+      return data;
+    }
+    const templatePieces = template.split("{text}");
+    let result = [];
+    if (templatePieces[0] !== "") {
+      result.push(templatePieces[0]);
+    }
+    result = result.concat(data.slice(1));
+    if (templatePieces[1] !== "") {
+      result.push(templatePieces[1]);
+    }
+    return result;
+  }
+  return format;
+}
+var object = { exports: {} };
+var hasRequiredObject;
+function requireObject() {
+  if (hasRequiredObject) return object.exports;
+  hasRequiredObject = 1;
+  (function(module2) {
+    const util = require$$0$2;
+    module2.exports = {
+      serialize,
+      maxDepth({ data, transport, depth = (transport == null ? void 0 : transport.depth) ?? 6 }) {
+        if (!data) {
+          return data;
+        }
+        if (depth < 1) {
+          if (Array.isArray(data)) return "[array]";
+          if (typeof data === "object" && data) return "[object]";
+          return data;
+        }
+        if (Array.isArray(data)) {
+          return data.map((child) => module2.exports.maxDepth({
+            data: child,
+            depth: depth - 1
+          }));
+        }
+        if (typeof data !== "object") {
+          return data;
+        }
+        if (data && typeof data.toISOString === "function") {
+          return data;
+        }
+        if (data === null) {
+          return null;
+        }
+        if (data instanceof Error) {
+          return data;
+        }
+        const newJson = {};
+        for (const i in data) {
+          if (!Object.prototype.hasOwnProperty.call(data, i)) continue;
+          newJson[i] = module2.exports.maxDepth({
+            data: data[i],
+            depth: depth - 1
+          });
+        }
+        return newJson;
+      },
+      toJSON({ data }) {
+        return JSON.parse(JSON.stringify(data, createSerializer()));
+      },
+      toString({ data, transport }) {
+        const inspectOptions = (transport == null ? void 0 : transport.inspectOptions) || {};
+        const simplifiedData = data.map((item) => {
+          if (item === void 0) {
+            return void 0;
+          }
+          try {
+            const str = JSON.stringify(item, createSerializer(), "  ");
+            return str === void 0 ? void 0 : JSON.parse(str);
+          } catch (e) {
+            return item;
+          }
+        });
+        return util.formatWithOptions(inspectOptions, ...simplifiedData);
+      }
+    };
+    function createSerializer(options = {}) {
+      const seen = /* @__PURE__ */ new WeakSet();
+      return function(key, value) {
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return void 0;
+          }
+          seen.add(value);
+        }
+        return serialize(key, value, options);
+      };
+    }
+    function serialize(key, value, options = {}) {
+      const serializeMapAndSet = (options == null ? void 0 : options.serializeMapAndSet) !== false;
+      if (value instanceof Error) {
+        return value.stack;
+      }
+      if (!value) {
+        return value;
+      }
+      if (typeof value === "function") {
+        return `[function] ${value.toString()}`;
+      }
+      if (value instanceof Date) {
+        return value.toISOString();
+      }
+      if (serializeMapAndSet && value instanceof Map && Object.fromEntries) {
+        return Object.fromEntries(value);
+      }
+      if (serializeMapAndSet && value instanceof Set && Array.from) {
+        return Array.from(value);
+      }
+      return value;
+    }
+  })(object);
+  return object.exports;
+}
+var style;
+var hasRequiredStyle;
+function requireStyle() {
+  if (hasRequiredStyle) return style;
+  hasRequiredStyle = 1;
+  style = {
+    transformStyles,
+    applyAnsiStyles({ data }) {
+      return transformStyles(data, styleToAnsi, resetAnsiStyle);
+    },
+    removeStyles({ data }) {
+      return transformStyles(data, () => "");
+    }
+  };
+  const ANSI_COLORS = {
+    unset: "\x1B[0m",
+    black: "\x1B[30m",
+    red: "\x1B[31m",
+    green: "\x1B[32m",
+    yellow: "\x1B[33m",
+    blue: "\x1B[34m",
+    magenta: "\x1B[35m",
+    cyan: "\x1B[36m",
+    white: "\x1B[37m",
+    gray: "\x1B[90m"
+  };
+  function styleToAnsi(style2) {
+    const color = style2.replace(/color:\s*(\w+).*/, "$1").toLowerCase();
+    return ANSI_COLORS[color] || "";
+  }
+  function resetAnsiStyle(string) {
+    return string + ANSI_COLORS.unset;
+  }
+  function transformStyles(data, onStyleFound, onStyleApplied) {
+    const foundStyles = {};
+    return data.reduce((result, item, index, array) => {
+      if (foundStyles[index]) {
+        return result;
+      }
+      if (typeof item === "string") {
+        let valueIndex = index;
+        let styleApplied = false;
+        item = item.replace(/%[1cdfiOos]/g, (match) => {
+          valueIndex += 1;
+          if (match !== "%c") {
+            return match;
+          }
+          const style2 = array[valueIndex];
+          if (typeof style2 === "string") {
+            foundStyles[valueIndex] = true;
+            styleApplied = true;
+            return onStyleFound(style2, item);
+          }
+          return match;
+        });
+        if (styleApplied && onStyleApplied) {
+          item = onStyleApplied(item);
+        }
+      }
+      result.push(item);
+      return result;
+    }, []);
+  }
+  return style;
+}
+var console_1;
+var hasRequiredConsole;
+function requireConsole() {
+  if (hasRequiredConsole) return console_1;
+  hasRequiredConsole = 1;
+  const {
+    concatFirstStringElements,
+    format: format2
+  } = requireFormat();
+  const { maxDepth, toJSON } = requireObject();
+  const {
+    applyAnsiStyles,
+    removeStyles
+  } = requireStyle();
+  const { transform } = requireTransform();
+  const consoleMethods = {
+    error: console.error,
+    warn: console.warn,
+    info: console.info,
+    verbose: console.info,
+    debug: console.debug,
+    silly: console.debug,
+    log: console.log
+  };
+  console_1 = consoleTransportFactory;
+  const separator = process.platform === "win32" ? ">" : "›";
+  const DEFAULT_FORMAT = `%c{h}:{i}:{s}.{ms}{scope}%c ${separator} {text}`;
+  Object.assign(consoleTransportFactory, {
+    DEFAULT_FORMAT
+  });
+  function consoleTransportFactory(logger) {
+    return Object.assign(transport, {
+      colorMap: {
+        error: "red",
+        warn: "yellow",
+        info: "cyan",
+        verbose: "unset",
+        debug: "gray",
+        silly: "gray",
+        default: "unset"
+      },
+      format: DEFAULT_FORMAT,
+      level: "silly",
+      transforms: [
+        addTemplateColors,
+        format2,
+        formatStyles,
+        concatFirstStringElements,
+        maxDepth,
+        toJSON
+      ],
+      useStyles: process.env.FORCE_STYLES,
+      writeFn({ message }) {
+        const consoleLogFn = consoleMethods[message.level] || consoleMethods.info;
+        consoleLogFn(...message.data);
+      }
+    });
+    function transport(message) {
+      const data = transform({ logger, message, transport });
+      transport.writeFn({
+        message: { ...message, data }
+      });
+    }
+  }
+  function addTemplateColors({ data, message, transport }) {
+    if (typeof transport.format !== "string" || !transport.format.includes("%c")) {
+      return data;
+    }
+    return [
+      `color:${levelToStyle(message.level, transport)}`,
+      "color:unset",
+      ...data
+    ];
+  }
+  function canUseStyles(useStyleValue, level) {
+    if (typeof useStyleValue === "boolean") {
+      return useStyleValue;
+    }
+    const useStderr = level === "error" || level === "warn";
+    const stream2 = useStderr ? process.stderr : process.stdout;
+    return stream2 && stream2.isTTY;
+  }
+  function formatStyles(args) {
+    const { message, transport } = args;
+    const useStyles = canUseStyles(transport.useStyles, message.level);
+    const nextTransform = useStyles ? applyAnsiStyles : removeStyles;
+    return nextTransform(args);
+  }
+  function levelToStyle(level, transport) {
+    return transport.colorMap[level] || transport.colorMap.default;
+  }
+  return console_1;
+}
+var File_1;
+var hasRequiredFile$1;
+function requireFile$1() {
+  if (hasRequiredFile$1) return File_1;
+  hasRequiredFile$1 = 1;
+  const EventEmitter = require$$0$3;
+  const fs = require$$0;
+  const os = require$$1;
+  class File extends EventEmitter {
+    constructor({
+      path,
+      writeOptions = { encoding: "utf8", flag: "a", mode: 438 },
+      writeAsync = false
+    }) {
+      super();
+      __publicField(this, "asyncWriteQueue", []);
+      __publicField(this, "bytesWritten", 0);
+      __publicField(this, "hasActiveAsyncWriting", false);
+      __publicField(this, "path", null);
+      __publicField(this, "initialSize");
+      __publicField(this, "writeOptions", null);
+      __publicField(this, "writeAsync", false);
+      this.path = path;
+      this.writeOptions = writeOptions;
+      this.writeAsync = writeAsync;
+    }
+    get size() {
+      return this.getSize();
+    }
+    clear() {
+      try {
+        fs.writeFileSync(this.path, "", {
+          mode: this.writeOptions.mode,
+          flag: "w"
+        });
+        this.reset();
+        return true;
+      } catch (e) {
+        if (e.code === "ENOENT") {
+          return true;
+        }
+        this.emit("error", e, this);
+        return false;
+      }
+    }
+    crop(bytesAfter) {
+      try {
+        const content = readFileSyncFromEnd(this.path, bytesAfter || 4096);
+        this.clear();
+        this.writeLine(`[log cropped]${os.EOL}${content}`);
+      } catch (e) {
+        this.emit(
+          "error",
+          new Error(`Couldn't crop file ${this.path}. ${e.message}`),
+          this
+        );
+      }
+    }
+    getSize() {
+      if (this.initialSize === void 0) {
+        try {
+          const stats = fs.statSync(this.path);
+          this.initialSize = stats.size;
+        } catch (e) {
+          this.initialSize = 0;
+        }
+      }
+      return this.initialSize + this.bytesWritten;
+    }
+    increaseBytesWrittenCounter(text) {
+      this.bytesWritten += Buffer.byteLength(text, this.writeOptions.encoding);
+    }
+    isNull() {
+      return false;
+    }
+    nextAsyncWrite() {
+      const file2 = this;
+      if (this.hasActiveAsyncWriting || this.asyncWriteQueue.length === 0) {
+        return;
+      }
+      const text = this.asyncWriteQueue.join("");
+      this.asyncWriteQueue = [];
+      this.hasActiveAsyncWriting = true;
+      fs.writeFile(this.path, text, this.writeOptions, (e) => {
+        file2.hasActiveAsyncWriting = false;
+        if (e) {
+          file2.emit(
+            "error",
+            new Error(`Couldn't write to ${file2.path}. ${e.message}`),
+            this
+          );
+        } else {
+          file2.increaseBytesWrittenCounter(text);
+        }
+        file2.nextAsyncWrite();
+      });
+    }
+    reset() {
+      this.initialSize = void 0;
+      this.bytesWritten = 0;
+    }
+    toString() {
+      return this.path;
+    }
+    writeLine(text) {
+      text += os.EOL;
+      if (this.writeAsync) {
+        this.asyncWriteQueue.push(text);
+        this.nextAsyncWrite();
+        return;
+      }
+      try {
+        fs.writeFileSync(this.path, text, this.writeOptions);
+        this.increaseBytesWrittenCounter(text);
+      } catch (e) {
+        this.emit(
+          "error",
+          new Error(`Couldn't write to ${this.path}. ${e.message}`),
+          this
+        );
+      }
+    }
+  }
+  File_1 = File;
+  function readFileSyncFromEnd(filePath, bytesCount) {
+    const buffer = Buffer.alloc(bytesCount);
+    const stats = fs.statSync(filePath);
+    const readLength = Math.min(stats.size, bytesCount);
+    const offset = Math.max(0, stats.size - bytesCount);
+    const fd = fs.openSync(filePath, "r");
+    const totalBytes = fs.readSync(fd, buffer, 0, readLength, offset);
+    fs.closeSync(fd);
+    return buffer.toString("utf8", 0, totalBytes);
+  }
+  return File_1;
+}
+var NullFile_1;
+var hasRequiredNullFile;
+function requireNullFile() {
+  if (hasRequiredNullFile) return NullFile_1;
+  hasRequiredNullFile = 1;
+  const File = requireFile$1();
+  class NullFile extends File {
+    clear() {
+    }
+    crop() {
+    }
+    getSize() {
+      return 0;
+    }
+    isNull() {
+      return true;
+    }
+    writeLine() {
+    }
+  }
+  NullFile_1 = NullFile;
+  return NullFile_1;
+}
+var FileRegistry_1;
+var hasRequiredFileRegistry;
+function requireFileRegistry() {
+  if (hasRequiredFileRegistry) return FileRegistry_1;
+  hasRequiredFileRegistry = 1;
+  const EventEmitter = require$$0$3;
+  const fs = require$$0;
+  const path = require$$2;
+  const File = requireFile$1();
+  const NullFile = requireNullFile();
+  class FileRegistry extends EventEmitter {
+    constructor() {
+      super();
+      __publicField(this, "store", {});
+      this.emitError = this.emitError.bind(this);
+    }
+    /**
+     * Provide a File object corresponding to the filePath
+     * @param {string} filePath
+     * @param {WriteOptions} [writeOptions]
+     * @param {boolean} [writeAsync]
+     * @return {File}
+     */
+    provide({ filePath, writeOptions = {}, writeAsync = false }) {
+      let file2;
+      try {
+        filePath = path.resolve(filePath);
+        if (this.store[filePath]) {
+          return this.store[filePath];
+        }
+        file2 = this.createFile({ filePath, writeOptions, writeAsync });
+      } catch (e) {
+        file2 = new NullFile({ path: filePath });
+        this.emitError(e, file2);
+      }
+      file2.on("error", this.emitError);
+      this.store[filePath] = file2;
+      return file2;
+    }
+    /**
+     * @param {string} filePath
+     * @param {WriteOptions} writeOptions
+     * @param {boolean} async
+     * @return {File}
+     * @private
+     */
+    createFile({ filePath, writeOptions, writeAsync }) {
+      this.testFileWriting({ filePath, writeOptions });
+      return new File({ path: filePath, writeOptions, writeAsync });
+    }
+    /**
+     * @param {Error} error
+     * @param {File} file
+     * @private
+     */
+    emitError(error, file2) {
+      this.emit("error", error, file2);
+    }
+    /**
+     * @param {string} filePath
+     * @param {WriteOptions} writeOptions
+     * @private
+     */
+    testFileWriting({ filePath, writeOptions }) {
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+      fs.writeFileSync(filePath, "", { flag: "a", mode: writeOptions.mode });
+    }
+  }
+  FileRegistry_1 = FileRegistry;
+  return FileRegistry_1;
+}
+var file;
+var hasRequiredFile;
+function requireFile() {
+  if (hasRequiredFile) return file;
+  hasRequiredFile = 1;
+  const fs = require$$0;
+  const os = require$$1;
+  const path = require$$2;
+  const FileRegistry = requireFileRegistry();
+  const { transform } = requireTransform();
+  const { removeStyles } = requireStyle();
+  const {
+    format: format2,
+    concatFirstStringElements
+  } = requireFormat();
+  const { toString } = requireObject();
+  file = fileTransportFactory;
+  const globalRegistry = new FileRegistry();
+  function fileTransportFactory(logger, { registry = globalRegistry, externalApi } = {}) {
+    let pathVariables;
+    if (registry.listenerCount("error") < 1) {
+      registry.on("error", (e, file2) => {
+        logConsole(`Can't write to ${file2}`, e);
+      });
+    }
+    return Object.assign(transport, {
+      fileName: getDefaultFileName(logger.variables.processType),
+      format: "[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}",
+      getFile,
+      inspectOptions: { depth: 5 },
+      level: "silly",
+      maxSize: 1024 ** 2,
+      readAllLogs,
+      sync: true,
+      transforms: [removeStyles, format2, concatFirstStringElements, toString],
+      writeOptions: { flag: "a", mode: 438, encoding: "utf8" },
+      archiveLogFn(file2) {
+        const oldPath = file2.toString();
+        const inf = path.parse(oldPath);
+        try {
+          fs.renameSync(oldPath, path.join(inf.dir, `${inf.name}.old${inf.ext}`));
+        } catch (e) {
+          logConsole("Could not rotate log", e);
+          const quarterOfMaxSize = Math.round(transport.maxSize / 4);
+          file2.crop(Math.min(quarterOfMaxSize, 256 * 1024));
+        }
+      },
+      resolvePathFn(vars) {
+        return path.join(vars.libraryDefaultDir, vars.fileName);
+      },
+      setAppName(name) {
+        logger.dependencies.externalApi.setAppName(name);
+      }
+    });
+    function transport(message) {
+      const file2 = getFile(message);
+      const needLogRotation = transport.maxSize > 0 && file2.size > transport.maxSize;
+      if (needLogRotation) {
+        transport.archiveLogFn(file2);
+        file2.reset();
+      }
+      const content = transform({ logger, message, transport });
+      file2.writeLine(content);
+    }
+    function initializeOnFirstAccess() {
+      if (pathVariables) {
+        return;
+      }
+      pathVariables = Object.create(
+        Object.prototype,
+        {
+          ...Object.getOwnPropertyDescriptors(
+            externalApi.getPathVariables()
+          ),
+          fileName: {
+            get() {
+              return transport.fileName;
+            },
+            enumerable: true
+          }
+        }
+      );
+      if (typeof transport.archiveLog === "function") {
+        transport.archiveLogFn = transport.archiveLog;
+        logConsole("archiveLog is deprecated. Use archiveLogFn instead");
+      }
+      if (typeof transport.resolvePath === "function") {
+        transport.resolvePathFn = transport.resolvePath;
+        logConsole("resolvePath is deprecated. Use resolvePathFn instead");
+      }
+    }
+    function logConsole(message, error = null, level = "error") {
+      const data = [`electron-log.transports.file: ${message}`];
+      if (error) {
+        data.push(error);
+      }
+      logger.transports.console({ data, date: /* @__PURE__ */ new Date(), level });
+    }
+    function getFile(msg) {
+      initializeOnFirstAccess();
+      const filePath = transport.resolvePathFn(pathVariables, msg);
+      return registry.provide({
+        filePath,
+        writeAsync: !transport.sync,
+        writeOptions: transport.writeOptions
+      });
+    }
+    function readAllLogs({ fileFilter = (f) => f.endsWith(".log") } = {}) {
+      initializeOnFirstAccess();
+      const logsPath = path.dirname(transport.resolvePathFn(pathVariables));
+      if (!fs.existsSync(logsPath)) {
+        return [];
+      }
+      return fs.readdirSync(logsPath).map((fileName) => path.join(logsPath, fileName)).filter(fileFilter).map((logPath) => {
+        try {
+          return {
+            path: logPath,
+            lines: fs.readFileSync(logPath, "utf8").split(os.EOL)
+          };
+        } catch {
+          return null;
+        }
+      }).filter(Boolean);
+    }
+  }
+  function getDefaultFileName(processType = process.type) {
+    switch (processType) {
+      case "renderer":
+        return "renderer.log";
+      case "worker":
+        return "worker.log";
+      default:
+        return "main.log";
+    }
+  }
+  return file;
+}
+var ipc;
+var hasRequiredIpc;
+function requireIpc() {
+  if (hasRequiredIpc) return ipc;
+  hasRequiredIpc = 1;
+  const { maxDepth, toJSON } = requireObject();
+  const { transform } = requireTransform();
+  ipc = ipcTransportFactory;
+  function ipcTransportFactory(logger, { externalApi }) {
+    Object.assign(transport, {
+      depth: 3,
+      eventId: "__ELECTRON_LOG_IPC__",
+      level: logger.isDev ? "silly" : false,
+      transforms: [toJSON, maxDepth]
+    });
+    return (externalApi == null ? void 0 : externalApi.isElectron()) ? transport : void 0;
+    function transport(message) {
+      var _a;
+      if (((_a = message == null ? void 0 : message.variables) == null ? void 0 : _a.processType) === "renderer") {
+        return;
+      }
+      externalApi == null ? void 0 : externalApi.sendIpc(transport.eventId, {
+        ...message,
+        data: transform({ logger, message, transport })
+      });
+    }
+  }
+  return ipc;
+}
+var remote;
+var hasRequiredRemote;
+function requireRemote() {
+  if (hasRequiredRemote) return remote;
+  hasRequiredRemote = 1;
+  const http = require$$0$4;
+  const https = require$$1$1;
+  const { transform } = requireTransform();
+  const { removeStyles } = requireStyle();
+  const { toJSON, maxDepth } = requireObject();
+  remote = remoteTransportFactory;
+  function remoteTransportFactory(logger) {
+    return Object.assign(transport, {
+      client: { name: "electron-application" },
+      depth: 6,
+      level: false,
+      requestOptions: {},
+      transforms: [removeStyles, toJSON, maxDepth],
+      makeBodyFn({ message }) {
+        return JSON.stringify({
+          client: transport.client,
+          data: message.data,
+          date: message.date.getTime(),
+          level: message.level,
+          scope: message.scope,
+          variables: message.variables
+        });
+      },
+      processErrorFn({ error }) {
+        logger.processMessage(
+          {
+            data: [`electron-log: can't POST ${transport.url}`, error],
+            level: "warn"
+          },
+          { transports: ["console", "file"] }
+        );
+      },
+      sendRequestFn({ serverUrl, requestOptions, body }) {
+        const httpTransport = serverUrl.startsWith("https:") ? https : http;
+        const request = httpTransport.request(serverUrl, {
+          method: "POST",
+          ...requestOptions,
+          headers: {
+            "Content-Type": "application/json",
+            "Content-Length": body.length,
+            ...requestOptions.headers
+          }
+        });
+        request.write(body);
+        request.end();
+        return request;
+      }
+    });
+    function transport(message) {
+      if (!transport.url) {
+        return;
+      }
+      const body = transport.makeBodyFn({
+        logger,
+        message: { ...message, data: transform({ logger, message, transport }) },
+        transport
+      });
+      const request = transport.sendRequestFn({
+        serverUrl: transport.url,
+        requestOptions: transport.requestOptions,
+        body: Buffer.from(body, "utf8")
+      });
+      request.on("error", (error) => transport.processErrorFn({
+        error,
+        logger,
+        message,
+        request,
+        transport
+      }));
+    }
+  }
+  return remote;
+}
+var createDefaultLogger_1;
+var hasRequiredCreateDefaultLogger;
+function requireCreateDefaultLogger() {
+  if (hasRequiredCreateDefaultLogger) return createDefaultLogger_1;
+  hasRequiredCreateDefaultLogger = 1;
+  const Logger = requireLogger();
+  const ErrorHandler = requireErrorHandler();
+  const EventLogger = requireEventLogger();
+  const transportConsole = requireConsole();
+  const transportFile = requireFile();
+  const transportIpc = requireIpc();
+  const transportRemote = requireRemote();
+  createDefaultLogger_1 = createDefaultLogger;
+  function createDefaultLogger({ dependencies, initializeFn }) {
+    var _a;
+    const defaultLogger = new Logger({
+      dependencies,
+      errorHandler: new ErrorHandler(),
+      eventLogger: new EventLogger(),
+      initializeFn,
+      isDev: (_a = dependencies.externalApi) == null ? void 0 : _a.isDev(),
+      logId: "default",
+      transportFactories: {
+        console: transportConsole,
+        file: transportFile,
+        ipc: transportIpc,
+        remote: transportRemote
+      },
+      variables: {
+        processType: "main"
+      }
+    });
+    defaultLogger.default = defaultLogger;
+    defaultLogger.Logger = Logger;
+    defaultLogger.processInternalErrorFn = (e) => {
+      defaultLogger.transports.console.writeFn({
+        message: {
+          data: ["Unhandled electron-log error", e],
+          level: "error"
+        }
+      });
+    };
+    return defaultLogger;
+  }
+  return createDefaultLogger_1;
+}
+var main;
+var hasRequiredMain;
+function requireMain() {
+  if (hasRequiredMain) return main;
+  hasRequiredMain = 1;
+  const electron = require$$0$5;
+  const ElectronExternalApi = requireElectronExternalApi();
+  const { initialize: initialize2 } = requireInitialize();
+  const createDefaultLogger = requireCreateDefaultLogger();
+  const externalApi = new ElectronExternalApi({ electron });
+  const defaultLogger = createDefaultLogger({
+    dependencies: { externalApi },
+    initializeFn: initialize2
+  });
+  main = defaultLogger;
+  externalApi.onIpc("__ELECTRON_LOG__", (_, message) => {
+    if (message.scope) {
+      defaultLogger.Logger.getInstance(message).scope(message.scope);
+    }
+    const date = new Date(message.date);
+    processMessage({
+      ...message,
+      date: date.getTime() ? date : /* @__PURE__ */ new Date()
+    });
+  });
+  externalApi.onIpcInvoke("__ELECTRON_LOG__", (_, { cmd = "", logId }) => {
+    switch (cmd) {
+      case "getOptions": {
+        const logger = defaultLogger.Logger.getInstance({ logId });
+        return {
+          levels: logger.levels,
+          logId
+        };
+      }
+      default: {
+        processMessage({ data: [`Unknown cmd '${cmd}'`], level: "error" });
+        return {};
+      }
+    }
+  });
+  function processMessage(message) {
+    var _a;
+    (_a = defaultLogger.Logger.getInstance(message)) == null ? void 0 : _a.processMessage(message);
+  }
+  return main;
+}
+var node;
+var hasRequiredNode;
+function requireNode() {
+  if (hasRequiredNode) return node;
+  hasRequiredNode = 1;
+  const NodeExternalApi = requireNodeExternalApi();
+  const createDefaultLogger = requireCreateDefaultLogger();
+  const externalApi = new NodeExternalApi();
+  const defaultLogger = createDefaultLogger({
+    dependencies: { externalApi }
+  });
+  node = defaultLogger;
+  return node;
+}
+const isRenderer = typeof process === "undefined" || (process.type === "renderer" || process.type === "worker");
+const isMain = typeof process === "object" && process.type === "browser";
+if (isRenderer) {
+  requireElectronLogPreload();
+  src.exports = requireRenderer();
+} else if (isMain) {
+  src.exports = requireMain();
+} else {
+  src.exports = requireNode();
+}
+var srcExports = src.exports;
+const log = /* @__PURE__ */ getDefaultExportFromCjs(srcExports);
+const ALLOWED_EXTENSIONS = [
+  "xlsx",
+  "xls",
+  "csv",
+  "docx",
+  "pdf",
+  "png",
+  "jpg",
+  "jpeg",
+  "webp"
+];
+function registerFileHandlers(_backendPort) {
+  require$$0$5.ipcMain.handle("dialog:select-files", async () => {
+    const result = await require$$0$5.dialog.showOpenDialog({
+      title: "Selecciona archivos para analizar",
+      properties: ["openFile", "multiSelections"],
+      filters: [
+        {
+          name: "Archivos soportados",
+          extensions: ALLOWED_EXTENSIONS
+        }
+      ]
+    });
+    if (result.canceled)
+      return [];
+    return result.filePaths;
+  });
+}
+function getConfigPath() {
+  const dir = require$$0$5.app.getPath("userData");
+  require$$0.mkdirSync(dir, { recursive: true });
+  return require$$2.join(dir, "config.json");
+}
+function readConfig() {
+  try {
+    const path = getConfigPath();
+    if (!require$$0.existsSync(path))
+      return null;
+    const raw = require$$0.readFileSync(path, "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+function writeConfig(config) {
+  require$$0.writeFileSync(getConfigPath(), JSON.stringify(config, null, 2), "utf-8");
+}
+function registerConfigHandlers(backendPort2) {
+  require$$0$5.ipcMain.handle("config:save", async (_, config) => {
+    const full = {
+      ...config,
+      configuredAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    writeConfig(full);
+    try {
+      await fetch(`http://127.0.0.1:${backendPort2}/config/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ai_provider: config.aiProvider,
+          api_key: config.apiKey,
+          ollama_url: config.ollamaBaseUrl
+        })
+      });
+    } catch {
+    }
+  });
+  require$$0$5.ipcMain.handle("config:get", () => {
+    return readConfig();
+  });
+  require$$0$5.ipcMain.handle("config:test", async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:${backendPort2}/config/test`);
+      const data = await res.json();
+      return data;
+    } catch {
+      return { ok: false, error: "No se pudo conectar con el motor de IA." };
+    }
+  });
+}
+function getMainWindow() {
+  return require$$0$5.BrowserWindow.getAllWindows()[0] ?? null;
+}
+function registerAnalysisHandlers(backendPort2) {
+  require$$0$5.ipcMain.handle("analysis:start", async (_, request) => {
+    const res = await fetch(`http://127.0.0.1:${backendPort2}/analysis/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        file_paths: request.filePaths,
+        user_prompt: request.userPrompt,
+        output_format: request.outputFormat
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
+      throw new Error(err.detail ?? "Error al iniciar el análisis");
+    }
+    const data = await res.json();
+    const sessionId = data.session_id;
+    return { sessionId };
+  });
+  require$$0$5.ipcMain.handle("analysis:subscribe", (_, sessionId) => {
+    function consumeSSE() {
+      const sseReq = require$$0$4.request({
+        host: "127.0.0.1",
+        port: backendPort2,
+        path: `/analysis/progress/${sessionId}`
+      }, (sseRes) => {
+        let buffer = "";
+        sseRes.on("data", (chunk) => {
+          var _a;
+          buffer += chunk.toString();
+          const parts = buffer.split(/\n\n/);
+          buffer = parts.pop() ?? "";
+          for (const part of parts) {
+            const dataLine = part.split("\n").find((l) => l.startsWith("data:"));
+            if (!dataLine)
+              continue;
+            try {
+              const parsed = JSON.parse(dataLine.slice(5).trim());
+              (_a = getMainWindow()) == null ? void 0 : _a.webContents.send("analysis:progress", parsed);
+              if (parsed.stage === "done" || parsed.stage === "error") {
+                sseReq.destroy();
+              }
+            } catch {
+            }
+          }
+        });
+        sseRes.on("error", () => sseReq.destroy());
+      });
+      sseReq.on("error", () => {
+      });
+      sseReq.end();
+    }
+    consumeSSE();
+  });
+  require$$0$5.ipcMain.handle("analysis:result", async (_, sessionId) => {
+    const res = await fetch(`http://127.0.0.1:${backendPort2}/analysis/result/${sessionId}`);
+    const data = await res.json();
+    return {
+      sessionId: data.session_id,
+      analysisText: data.analysis_text,
+      outputFiles: (data.output_files ?? []).map((f) => ({
+        type: f.type,
+        fileName: f.file_name,
+        sessionId: f.session_id
+      })),
+      warnings: data.warnings ?? []
+    };
+  });
+}
+const FILE_CONFIG = {
+  word: { ext: "docx", label: "Documento Word" },
+  pptx: { ext: "pptx", label: "Presentación PowerPoint" }
+};
+function registerExportHandlers(backendPort2) {
+  require$$0$5.ipcMain.handle("export:save", async (_, request) => {
+    const config = FILE_CONFIG[request.fileType];
+    if (!config)
+      return { savedPath: "" };
+    const { filePath: savePath } = await require$$0$5.dialog.showSaveDialog({
+      title: `Guardar ${config.label}`,
+      defaultPath: `analisis_${Date.now()}.${config.ext}`,
+      filters: [{ name: config.label, extensions: [config.ext] }]
+    });
+    if (!savePath)
+      return { savedPath: "" };
+    const res = await fetch(`http://127.0.0.1:${backendPort2}/export/download`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: request.sessionId,
+        file_type: request.fileType
+      })
+    });
+    if (!res.ok || !res.body)
+      return { savedPath: "" };
+    const writer = require$$0.createWriteStream(savePath);
+    await promises.pipeline(stream.Readable.fromWeb(res.body), writer);
+    return { savedPath: savePath };
+  });
+}
+function generatePort() {
+  return Math.floor(Math.random() * (65535 - 49152 + 1)) + 49152;
+}
+log.initialize();
+log.transports.file.level = "info";
+let mainWindow = null;
+let pythonProcess = null;
+let backendPort = 8765;
+async function startPythonBackend() {
+  var _a, _b;
+  const isDev = !require$$0$5.app.isPackaged;
+  if (isDev) {
+    const devPort = parseInt(process.env.VITE_BACKEND_PORT ?? "8765", 10);
+    backendPort = devPort;
+    log.info(`Modo dev — usando backend en puerto ${devPort}`);
+    await waitForBackend(devPort);
+    return devPort;
+  }
+  const port = generatePort();
+  backendPort = port;
+  const exeName = process.platform === "win32" ? "excel-analyzer-backend.exe" : "excel-analyzer-backend";
+  const pythonCmd = require$$2.join(process.resourcesPath, "backend", exeName);
+  log.info(`Backend cmd: ${pythonCmd}`);
+  if (process.platform !== "win32") {
+    if (require$$0.existsSync(pythonCmd)) {
+      try {
+        require$$0.chmodSync(pythonCmd, 493);
+      } catch {
+      }
+    } else {
+      throw new Error(`Ejecutable no encontrado: ${pythonCmd}`);
+    }
+  }
+  log.info(`Iniciando backend en puerto ${port}`);
+  pythonProcess = require$$0$1.spawn(pythonCmd, [], {
+    env: {
+      ...process.env,
+      BACKEND_PORT: String(port),
+      BACKEND_HOST: "127.0.0.1"
+    },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  (_a = pythonProcess.stdout) == null ? void 0 : _a.on("data", (data) => {
+    log.info(`[backend] ${data.toString().trim()}`);
+  });
+  (_b = pythonProcess.stderr) == null ? void 0 : _b.on("data", (data) => {
+    log.info(`[backend:err] ${data.toString().trim()}`);
+  });
+  pythonProcess.on("exit", (code) => {
+    log.warn(`Backend terminó con código: ${code}`);
+  });
+  await waitForBackend(port);
+  return port;
+}
+async function waitForBackend(port, retries = 120) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/health`);
+      if (res.ok) {
+        log.info("Backend listo");
+        return;
+      }
+    } catch {
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error("El backend no respondió en el tiempo esperado");
+}
+function createWindow() {
+  mainWindow = new require$$0$5.BrowserWindow({
+    width: 1100,
+    height: 750,
+    minWidth: 800,
+    minHeight: 600,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      preload: require$$2.join(__dirname, "preload.js"),
+      webSecurity: require$$0$5.app.isPackaged,
+      allowRunningInsecureContent: false
+    },
+    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
+    show: true
+  });
+  mainWindow.webContents.session.webRequest.onHeadersReceived(
+    { urls: [`http://127.0.0.1:*/*`] },
+    (details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Access-Control-Allow-Origin": ["*"],
+          "Access-Control-Allow-Headers": ["*"]
+        }
+      });
+    }
+  );
+  if (!require$$0$5.app.isPackaged) {
+    const devURL = process.env.VITE_DEV_SERVER_URL ?? "http://localhost:5173";
+    log.info(`Cargando renderer desde: ${devURL}`);
+    mainWindow.loadURL(devURL);
+    mainWindow.webContents.openDevTools();
+    mainWindow.webContents.on("before-input-event", (_, input) => {
+      if (input.type === "keyDown" && (input.key === "F5" || input.key === "r" && (input.meta || input.control))) {
+        mainWindow == null ? void 0 : mainWindow.webContents.reloadIgnoringCache();
+      }
+    });
+  } else {
+    mainWindow.loadFile(require$$2.join(__dirname, "../dist/index.html"));
+  }
+}
+require$$0$5.app.whenReady().then(async () => {
+  try {
+    await startPythonBackend();
+  } catch (err) {
+    log.error("Error iniciando backend:", err);
+    require$$0$5.dialog.showErrorBox(
+      "Error de inicio",
+      `No se pudo iniciar el motor de análisis.
 
 Revisa el log en:
-${E.transports.file.getFile().path}
+${log.transports.file.getFile().path}
 
-Intenta reiniciar la aplicación.`),m.app.quit();return}_t(),$t($),jt($,L),Nt($),Ye()});m.app.on("before-quit",()=>{_&&(_.kill("SIGTERM"),E.info("Backend detenido"))});m.app.on("window-all-closed",()=>{process.platform!=="darwin"&&m.app.quit()});m.app.on("activate",()=>{m.BrowserWindow.getAllWindows().length===0&&Ye()});m.app.on("web-contents-created",(l,c)=>{c.on("will-navigate",(s,o)=>{!o.startsWith("http://localhost")&&!o.startsWith("file://")&&s.preventDefault()}),c.setWindowOpenHandler(({url:s})=>(m.shell.openExternal(s),{action:"deny"}))});
+Intenta reiniciar la aplicación.`
+    );
+    require$$0$5.app.quit();
+    return;
+  }
+  registerFileHandlers();
+  registerConfigHandlers(backendPort);
+  registerAnalysisHandlers(backendPort);
+  registerExportHandlers(backendPort);
+  require$$0$5.ipcMain.handle("backend:port", () => backendPort);
+  require$$0$5.ipcMain.handle("analysis:status", async (_, sessionId) => {
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:${backendPort}/analysis/status/${sessionId}`
+      );
+      if (!res.ok) {
+        log.warn(
+          `[analysis:status] HTTP ${res.status} para sesión ${sessionId}`
+        );
+        return {
+          stage: "error",
+          percentage: 0,
+          message: `Error del servidor (${res.status})`,
+          done: false,
+          error: true
+        };
+      }
+      return res.json();
+    } catch (err) {
+      log.warn("[analysis:status] Backend no responde:", err);
+      return {
+        stage: "extracting",
+        percentage: 5,
+        message: "Conectando...",
+        done: false,
+        error: false
+      };
+    }
+  });
+  createWindow();
+});
+require$$0$5.app.on("before-quit", () => {
+  if (pythonProcess) {
+    pythonProcess.kill("SIGTERM");
+    log.info("Backend detenido");
+  }
+});
+require$$0$5.app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") require$$0$5.app.quit();
+});
+require$$0$5.app.on("activate", () => {
+  if (require$$0$5.BrowserWindow.getAllWindows().length === 0) createWindow();
+});
+require$$0$5.app.on("web-contents-created", (_, contents) => {
+  contents.on("will-navigate", (event, url) => {
+    if (!url.startsWith("http://localhost") && !url.startsWith("file://")) {
+      event.preventDefault();
+    }
+  });
+  contents.setWindowOpenHandler(({ url }) => {
+    require$$0$5.shell.openExternal(url);
+    return { action: "deny" };
+  });
+});
+//# sourceMappingURL=main.js.map

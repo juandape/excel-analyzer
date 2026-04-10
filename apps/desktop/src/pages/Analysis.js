@@ -1,47 +1,161 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-/** Página Analysis — progreso en tiempo real del análisis. */
+/** Página Analysis — progreso via polling IPC (simple y confiable). */
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+const STAGE_ORDER = ['extracting', 'analyzing', 'generating', 'done'];
 const STAGE_LABELS = {
     extracting: 'Extrayendo contenido del archivo',
     analyzing: 'Analizando con inteligencia artificial',
     generating: 'Generando archivos',
     done: '¡Análisis completado!',
-    error: 'Ocurrió un error',
 };
 export function Analysis() {
     const { sessionId } = useParams();
     const navigate = useNavigate();
-    const [events, setEvents] = useState([]);
-    const [currentPct, setCurrentPct] = useState(0);
+    const [stage, setStage] = useState('extracting');
+    const [pct, setPct] = useState(5);
+    const [message, setMessage] = useState('Iniciando...');
+    const [errorMsg, setErrorMsg] = useState('');
     useEffect(() => {
-        if (!sessionId)
+        if (!sessionId) {
+            console.error('[Analysis] sessionId no disponible');
             return;
-        const unsubscribe = window.electron.onProgress((event) => {
-            setEvents((prev) => {
-                const existing = prev.find((e) => e.stage === event.stage);
-                if (existing)
-                    return prev;
-                return [...prev, event];
-            });
-            setCurrentPct(event.percentage);
-            if (event.stage === 'done') {
-                setTimeout(() => navigate(`/results/${sessionId}`), 800);
+        }
+        let stopped = false;
+        async function poll() {
+            console.log('[Analysis] Iniciando polling para sesión:', sessionId);
+            while (!stopped) {
+                try {
+                    const status = await window.electron.getStatus(sessionId);
+                    setStage(status.stage);
+                    setPct(status.percentage);
+                    setMessage(status.message);
+                    if (status.error) {
+                        setErrorMsg(status.message);
+                        return;
+                    }
+                    if (status.done) {
+                        setTimeout(() => navigate(`/results/${sessionId}`), 800);
+                        return;
+                    }
+                }
+                catch (err) {
+                    console.warn('[polling] Error al obtener estado:', err);
+                }
+                await new Promise((r) => setTimeout(r, 1000));
             }
-            if (event.stage === 'error') {
-                // Se queda en la pantalla mostrando el error
-            }
-        });
-        return unsubscribe;
-    }, [sessionId, navigate]);
-    const hasError = events.some((e) => e.stage === 'error');
-    const errorEvent = events.find((e) => e.stage === 'error');
-    return (_jsx("div", { className: 'min-h-screen bg-slate-50 flex items-center justify-center p-6', children: _jsxs("div", { className: 'bg-white rounded-2xl shadow-sm border border-slate-200 p-8 w-full max-w-md', children: [_jsx("h2", { className: 'text-xl font-semibold text-slate-800 mb-6', children: hasError ? '⚠ Algo salió mal' : 'Analizando tu archivo...' }), _jsx("div", { className: 'space-y-3 mb-6', children: ['extracting', 'analyzing', 'generating', 'done'].map((stage) => {
-                        const event = events.find((e) => e.stage === stage);
-                        const isCurrent = events[events.length - 1]?.stage === stage ||
-                            (stage === 'extracting' && events.length === 0);
-                        return (_jsxs("div", { className: 'flex items-center gap-3', children: [_jsx("div", { className: 'w-5 flex-shrink-0', children: event ? (_jsx("span", { className: 'text-green-500', children: "\u2713" })) : isCurrent ? (_jsx("span", { className: 'animate-spin inline-block', children: "\u27F3" })) : (_jsx("span", { className: 'text-slate-300', children: "\u25CB" })) }), _jsx("span", { className: `text-sm ${event ? 'text-slate-700' : 'text-slate-400'}`, children: event?.message ?? STAGE_LABELS[stage] })] }, stage));
-                    }) }), !hasError && (_jsx("div", { className: 'w-full bg-slate-100 rounded-full h-2 mb-4', children: _jsx("div", { className: 'bg-accent h-2 rounded-full transition-all duration-500', style: { width: `${currentPct}%` } }) })), events.flatMap((e) => e.warnings ?? []).length > 0 && (_jsxs("div", { className: 'bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4', children: [_jsx("p", { className: 'text-xs font-medium text-amber-700 mb-1', children: "Notas de extracci\u00F3n:" }), events
-                            .flatMap((e) => e.warnings ?? [])
-                            .map((w, i) => (_jsxs("p", { className: 'text-xs text-amber-600', children: ["\u26A0 ", w] }, i)))] })), hasError && (_jsxs("div", { className: 'bg-red-50 border border-red-200 rounded-lg p-3 mt-4', children: [_jsx("p", { className: 'text-sm text-red-700', children: errorEvent?.message }), _jsx("button", { onClick: () => navigate('/home'), className: 'mt-3 text-sm text-red-600 font-medium hover:underline', children: "\u2190 Volver e intentar de nuevo" })] }))] }) }));
+        }
+        poll();
+        return () => {
+            stopped = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sessionId]);
+    const hasError = !!errorMsg;
+    const stageIndex = STAGE_ORDER.indexOf(stage);
+    return (_jsx("div", { style: {
+            minHeight: '100vh',
+            background: '#FAF7F2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+        }, children: _jsxs("div", { style: {
+                background: '#FFFFFF',
+                borderRadius: 20,
+                border: '1.5px solid #E8DDD5',
+                padding: '36px 32px',
+                width: '100%',
+                maxWidth: 440,
+            }, children: [_jsxs("div", { style: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        marginBottom: 28,
+                    }, children: [_jsx("div", { style: {
+                                width: 42,
+                                height: 42,
+                                borderRadius: 12,
+                                fontSize: 20,
+                                background: hasError
+                                    ? '#FEE2E2'
+                                    : 'linear-gradient(135deg, #8B6145, #5C4033)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }, children: hasError ? '⚠' : '📊' }), _jsxs("div", { children: [_jsx("p", { style: {
+                                        fontSize: 16,
+                                        fontWeight: 700,
+                                        color: '#2D1F14',
+                                        margin: 0,
+                                    }, children: hasError ? 'Algo salió mal' : 'Procesando tu archivo' }), _jsx("p", { style: {
+                                        fontSize: 12,
+                                        color: '#9A7D6B',
+                                        margin: 0,
+                                        marginTop: 2,
+                                    }, children: hasError
+                                        ? 'Revisa el error y vuelve a intentarlo'
+                                        : 'Esto tarda menos de un minuto' })] })] }), !hasError && (_jsx("div", { style: {
+                        width: '100%',
+                        height: 6,
+                        borderRadius: 10,
+                        background: '#F5EDE3',
+                        marginBottom: 28,
+                        overflow: 'hidden',
+                    }, children: _jsx("div", { style: {
+                            height: '100%',
+                            borderRadius: 10,
+                            background: 'linear-gradient(90deg, #C4956A, #8B6145)',
+                            width: `${pct}%`,
+                            transition: 'width 0.8s ease',
+                        } }) })), _jsx("div", { style: {
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                        marginBottom: 20,
+                    }, children: STAGE_ORDER.map((s, i) => {
+                        const isDone = i < stageIndex || (s === stage && stage === 'done');
+                        const isCurrent = s === stage && stage !== 'done';
+                        return (_jsxs("div", { style: { display: 'flex', alignItems: 'center', gap: 12 }, children: [_jsx("div", { style: {
+                                        width: 26,
+                                        height: 26,
+                                        borderRadius: '50%',
+                                        flexShrink: 0,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: 12,
+                                        fontWeight: 700,
+                                        background: isDone
+                                            ? 'linear-gradient(135deg, #8B6145, #5C4033)'
+                                            : isCurrent
+                                                ? '#FDF6F0'
+                                                : '#F5EDE3',
+                                        border: isCurrent
+                                            ? '2px solid #C4956A'
+                                            : '2px solid transparent',
+                                        color: isDone ? '#FFFFFF' : '#9A7D6B',
+                                    }, children: isDone ? '✓' : isCurrent ? '·' : '○' }), _jsx("span", { style: {
+                                        fontSize: 13,
+                                        fontWeight: isDone || isCurrent ? 600 : 400,
+                                        color: isDone
+                                            ? '#2D1F14'
+                                            : isCurrent
+                                                ? '#5C4033'
+                                                : '#C4A899',
+                                    }, children: isCurrent ? message : STAGE_LABELS[s] })] }, s));
+                    }) }), hasError && (_jsxs("div", { style: {
+                        background: '#FEF2F2',
+                        border: '1px solid #FECACA',
+                        borderRadius: 10,
+                        padding: '12px 14px',
+                    }, children: [_jsx("p", { style: { fontSize: 13, color: '#B91C1C', marginBottom: 10 }, children: errorMsg }), _jsx("button", { onClick: () => navigate('/home'), style: {
+                                fontSize: 12,
+                                color: '#8B6145',
+                                fontWeight: 600,
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                            }, children: "\u2190 Volver e intentar de nuevo" })] }))] }) }));
 }

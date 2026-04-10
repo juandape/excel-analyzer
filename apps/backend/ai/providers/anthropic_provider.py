@@ -57,5 +57,6 @@ class AnthropicProvider(AIClient):
             return True
         except anthropic_sdk.AuthenticationError:
             raise AppError(ErrorCode.INVALID_API_KEY)
-        except Exception:
-            return False
+        except Exception as e:
+            logger.warning("test_connection falló: %s", e)
+            raise AppError(ErrorCode.AI_UNAVAILABLE)

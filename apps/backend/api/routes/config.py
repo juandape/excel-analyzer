@@ -47,9 +47,10 @@ def save_configuration(request: SaveConfigRequest):
 def test_connection():
     try:
         client = create_ai_client()
-        ok = client.test_connection()
-        return ConfigResponse(ok=ok)
+        client.test_connection()
+        return ConfigResponse(ok=True)
     except AppError as e:
         return ConfigResponse(ok=False, error=e.user_message)
-    except Exception:
-        return ConfigResponse(ok=False, error="Error de conexión inesperado.")
+    except Exception as e:
+        logger.warning("test_connection inesperado: %s", e)
+        return ConfigResponse(ok=False, error="No se pudo verificar la conexión con la IA.")

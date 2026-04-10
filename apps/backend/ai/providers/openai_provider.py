@@ -56,8 +56,17 @@ class OpenAIProvider(AIClient):
             return True
         except AuthenticationError:
             raise AppError(ErrorCode.INVALID_API_KEY)
-        except Exception:
-            return False
+        except RateLimitError as e:
+            # 429 insufficient_quota = sin crédito; 429 rate_limit = límite de velocidad
+            msg = str(e)
+            if "insufficient_quota" in msg:
+                raise AppError(ErrorCode.AI_QUOTA_EXCEEDED)
+            raise AppError(ErrorCode.AI_RATE_LIMIT)
+        except APITimeoutError:
+            raise AppError(ErrorCode.AI_UNAVAILABLE)
+        except Exception as e:
+            logger.warning("test_connection falló: %s", e)
+            raise AppError(ErrorCode.AI_UNAVAILABLE)
 
 
 def _build_messages(

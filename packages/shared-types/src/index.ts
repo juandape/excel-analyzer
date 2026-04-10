@@ -13,7 +13,7 @@ export interface AppConfig {
 
 export type SupportedFileType = 'excel' | 'word' | 'pdf' | 'image';
 
-export type OutputFormat = 'word' | 'pptx' | 'both';
+export type OutputFormat = 'word' | 'pptx' | 'excel' | 'both' | 'all';
 
 // ─── Request / Response de análisis ──────────────────────────────────────────
 
@@ -21,6 +21,7 @@ export interface AnalyzeRequest {
   filePaths: string[]; // Rutas absolutas validadas por el proceso main
   userPrompt: string; // Máximo 2000 caracteres
   outputFormat: OutputFormat;
+  pptxTemplatePath?: string; // Ruta a plantilla .pptx personalizada (opcional)
 }
 
 export interface AnalyzeResponse {
@@ -47,9 +48,9 @@ export interface ProgressEvent {
 // ─── Resultado del análisis ───────────────────────────────────────────────────
 
 export interface OutputFile {
-  type: 'word' | 'pptx';
-  fileName: string; // Solo el nombre, sin ruta del sistema
-  sessionId: string; // Para construir la URL de descarga internamente
+  type: 'word' | 'pptx' | 'excel';
+  fileName: string;
+  sessionId: string;
 }
 
 export interface AnalysisResult {
@@ -64,7 +65,7 @@ export interface AnalysisResult {
 
 export interface ExportRequest {
   sessionId: string;
-  fileType: 'word' | 'pptx';
+  fileType: 'word' | 'pptx' | 'excel';
 }
 
 export interface ExportResponse {
@@ -77,11 +78,29 @@ export interface ElectronAPI {
   // Selección de archivos via diálogo nativo del OS
   selectFiles: () => Promise<string[]>;
 
+  // Selección de plantilla PowerPoint (.pptx)
+  selectPptxTemplate: () => Promise<string | null>;
+
   // Análisis — retorna sessionId inmediatamente; progreso via onProgress
   analyzeFiles: (request: AnalyzeRequest) => Promise<AnalyzeResponse>;
 
   // Suscripción a eventos de progreso
   onProgress: (callback: (event: ProgressEvent) => void) => () => void;
+
+  // Iniciar consumo de SSE (llamar DESPUÉS de onProgress para evitar race condition)
+  subscribeProgress: (sessionId: string) => Promise<void>;
+
+  // Puerto del backend (para EventSource directo en renderer)
+  getBackendPort: () => Promise<number>;
+
+  // Polling de estado del análisis
+  getStatus: (sessionId: string) => Promise<{
+    stage: string;
+    percentage: number;
+    message: string;
+    done: boolean;
+    error: boolean;
+  }>;
 
   // Obtener resultado una vez que stage === 'done'
   getResult: (sessionId: string) => Promise<AnalysisResult>;

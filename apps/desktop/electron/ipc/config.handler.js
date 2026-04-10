@@ -1,34 +1,52 @@
-import { ipcMain } from 'electron';
-import keytar from 'keytar';
-const SERVICE = 'excel-analyzer';
+import { ipcMain, app } from 'electron';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
+// Almacenamiento simple en JSON dentro de userData (sin módulos nativos)
+function getConfigPath() {
+    const dir = app.getPath('userData');
+    mkdirSync(dir, { recursive: true });
+    return join(dir, 'config.json');
+}
+function readConfig() {
+    try {
+        const path = getConfigPath();
+        if (!existsSync(path))
+            return null;
+        const raw = readFileSync(path, 'utf-8');
+        return JSON.parse(raw);
+    }
+    catch {
+        return null;
+    }
+}
+function writeConfig(config) {
+    writeFileSync(getConfigPath(), JSON.stringify(config, null, 2), 'utf-8');
+}
 export function registerConfigHandlers(backendPort) {
     ipcMain.handle('config:save', async (_, config) => {
-        await keytar.setPassword(SERVICE, 'ai_provider', config.aiProvider);
-        if (config.apiKey) {
-            await keytar.setPassword(SERVICE, 'api_key', config.apiKey);
-        }
-        if (config.ollamaBaseUrl) {
-            await keytar.setPassword(SERVICE, 'ollama_url', config.ollamaBaseUrl);
-        }
-        // Sincronizar con el backend
-        await fetch(`http://127.0.0.1:${backendPort}/config/save`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ai_provider: config.aiProvider,
-                api_key: config.apiKey,
-                ollama_url: config.ollamaBaseUrl,
-            }),
-        });
-    });
-    ipcMain.handle('config:get', async () => {
-        const provider = await keytar.getPassword(SERVICE, 'ai_provider');
-        if (!provider)
-            return null;
-        return {
-            aiProvider: provider,
+        const full = {
+            ...config,
             configuredAt: new Date().toISOString(),
         };
+        writeConfig(full);
+        // Sincronizar con el backend
+        try {
+            await fetch(`http://127.0.0.1:${backendPort}/config/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ai_provider: config.aiProvider,
+                    api_key: config.apiKey,
+                    ollama_url: config.ollamaBaseUrl,
+                }),
+            });
+        }
+        catch {
+            // Backend puede no estar listo aún en el primer guardado
+        }
+    });
+    ipcMain.handle('config:get', () => {
+        return readConfig();
     });
     ipcMain.handle('config:test', async () => {
         try {

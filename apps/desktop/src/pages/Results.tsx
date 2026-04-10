@@ -1,96 +1,420 @@
-/** Página Results — muestra el análisis y permite descargar los reportes. */
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import type { AnalysisResult } from '@excel-analyzer/shared-types'
+/** Página Results — pestañas separadas por tipo de output. */
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import type { AnalysisResult } from '@excel-analyzer/shared-types';
+
+type FileType = 'word' | 'pptx' | 'excel';
+
+const TAB_CONFIG: Record<
+  FileType,
+  { icon: string; label: string; accent: string; border: string; bg: string }
+> = {
+  word: {
+    icon: '📄',
+    label: 'Informe Word',
+    accent: '#5C4033',
+    border: '#D4C4B8',
+    bg: '#FDF6F0',
+  },
+  pptx: {
+    icon: '📊',
+    label: 'PowerPoint',
+    accent: '#4A3728',
+    border: '#D4C4B8',
+    bg: '#F5EDE3',
+  },
+  excel: {
+    icon: '📈',
+    label: 'Excel',
+    accent: '#2D4A28',
+    border: '#C4D4B8',
+    bg: '#F0F5E3',
+  },
+};
 
 export function Results() {
-  const { sessionId } = useParams<{ sessionId: string }>()
-  const navigate = useNavigate()
-  const [result, setResult] = useState<AnalysisResult | null>(null)
-  const [downloading, setDownloading] = useState<string | null>(null)
+  const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [activeTab, setActiveTab] = useState<FileType | 'summary'>('summary');
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const [savedToast, setSavedToast] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!sessionId) return
-    window.electron.getResult(sessionId).then(setResult)
-  }, [sessionId])
+    if (!sessionId) return;
+    window.electron.getResult(sessionId).then((r) => {
+      setResult(r);
+      // Activar primera pestaña disponible si hay múltiples outputs
+      const files = r?.outputFiles ?? [];
+      if (files.length > 0) {
+        setActiveTab(files[0].type as FileType);
+      }
+    });
+  }, [sessionId]);
 
-  async function handleDownload(fileType: 'word' | 'pptx') {
-    if (!sessionId) return
-    setDownloading(fileType)
-    await window.electron.saveFile({ sessionId, fileType })
-    setDownloading(null)
+  async function handleDownload(fileType: FileType) {
+    if (!sessionId) return;
+    setDownloading(fileType);
+    const response = await window.electron.saveFile({ sessionId, fileType });
+    setDownloading(null);
+    if (response?.savedPath) {
+      setSavedToast(fileType);
+      setTimeout(() => setSavedToast(null), 3000);
+    }
   }
 
   if (!result) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#FAF7F2',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            border: '3px solid #E8DDD5',
+            borderTopColor: '#8B6145',
+            animation: 'spin 0.8s linear infinite',
+          }}
+        />
       </div>
-    )
+    );
   }
 
-  const hasWord = result.outputFiles.some((f) => f.type === 'word')
-  const hasPptx = result.outputFiles.some((f) => f.type === 'pptx')
+  const outputFiles = result.outputFiles ?? [];
+  const availableTabs = outputFiles
+    .map((f) => f.type as FileType)
+    .filter((t) => t in TAB_CONFIG);
+  const hasTabs = availableTabs.length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
-        <p className="text-sm text-green-600 font-medium">✅ Análisis completado</p>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#FAF7F2',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Header */}
+      <header
+        style={{
+          background: 'linear-gradient(135deg, #5C4033, #8B6145)',
+          padding: '14px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+        }}
+      >
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            background: 'rgba(255,255,255,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 14,
+          }}
+        >
+          ✅
+        </div>
+        <span style={{ color: '#F5EDE3', fontWeight: 700, fontSize: 15 }}>
+          Análisis completado
+        </span>
       </header>
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-8 space-y-6">
-        {/* Texto del análisis */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">Resultado del análisis</h2>
-          <div className="prose prose-sm max-w-none text-slate-700 whitespace-pre-wrap">
-            {result.analysisText}
-          </div>
-        </div>
-
+      <main
+        style={{
+          flex: 1,
+          maxWidth: 760,
+          width: '100%',
+          margin: '0 auto',
+          padding: '28px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 20,
+        }}
+      >
         {/* Advertencias */}
         {result.warnings.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <p className="text-xs font-medium text-amber-700 mb-1">Notas del procesamiento:</p>
+          <section
+            style={{
+              background: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              borderRadius: 12,
+              padding: '12px 16px',
+            }}
+          >
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: '#92400E',
+                marginBottom: 6,
+              }}
+            >
+              Notas del procesamiento:
+            </p>
             {result.warnings.map((w, i) => (
-              <p key={i} className="text-xs text-amber-600">⚠ {w}</p>
+              <p
+                key={i}
+                style={{ fontSize: 11, color: '#B45309', margin: '3px 0' }}
+              >
+                ⚠ {w}
+              </p>
             ))}
-          </div>
+          </section>
         )}
 
-        {/* Descargas */}
-        {(hasWord || hasPptx) && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Descargar archivos</h3>
-            <div className="flex gap-3 flex-wrap">
-              {hasWord && (
+        {/* Pestañas de outputs */}
+        {hasTabs && (
+          <section
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 16,
+              border: '1.5px solid #E8DDD5',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Barra de pestañas */}
+            <div
+              style={{
+                display: 'flex',
+                borderBottom: '1.5px solid #E8DDD5',
+                background: '#FAF7F2',
+              }}
+            >
+              {/* Pestaña resumen solo si hay un único output */}
+              {availableTabs.length === 1 && (
                 <button
-                  onClick={() => handleDownload('word')}
-                  disabled={downloading === 'word'}
-                  className="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-5 py-3 text-sm font-medium hover:bg-blue-100 disabled:opacity-50 transition-colors"
+                  onClick={() => setActiveTab('summary')}
+                  style={{
+                    padding: '12px 20px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    border: 'none',
+                    borderBottom:
+                      activeTab === 'summary'
+                        ? '2.5px solid #8B6145'
+                        : '2.5px solid transparent',
+                    background:
+                      activeTab === 'summary' ? '#FFFFFF' : 'transparent',
+                    color: activeTab === 'summary' ? '#5C4033' : '#9A7D6B',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
                 >
-                  📄 {downloading === 'word' ? 'Guardando...' : 'Informe Word'}
+                  📋 Resumen
                 </button>
               )}
-              {hasPptx && (
-                <button
-                  onClick={() => handleDownload('pptx')}
-                  disabled={downloading === 'pptx'}
-                  className="flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 rounded-xl px-5 py-3 text-sm font-medium hover:bg-orange-100 disabled:opacity-50 transition-colors"
-                >
-                  📊 {downloading === 'pptx' ? 'Guardando...' : 'PowerPoint'}
-                </button>
-              )}
+              {availableTabs.map((tab) => {
+                const cfg = TAB_CONFIG[tab];
+                const isActive = activeTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                      padding: '12px 20px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      border: 'none',
+                      borderBottom: isActive
+                        ? '2.5px solid #8B6145'
+                        : '2.5px solid transparent',
+                      background: isActive ? '#FFFFFF' : 'transparent',
+                      color: isActive ? '#5C4033' : '#9A7D6B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      transition: 'color 0.15s',
+                    }}
+                  >
+                    {cfg.icon} {cfg.label}
+                    {savedToast === tab && (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          background: '#D1FAE5',
+                          color: '#065F46',
+                          borderRadius: 6,
+                          padding: '2px 6px',
+                          marginLeft: 4,
+                        }}
+                      >
+                        ✓ Guardado
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          </div>
+
+            {/* Contenido de pestaña resumen */}
+            {activeTab === 'summary' && availableTabs.length === 1 && (
+              <div
+                style={{
+                  padding: '20px 22px',
+                  fontSize: 14,
+                  lineHeight: 1.75,
+                  color: '#4A3728',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {result.analysisText}
+              </div>
+            )}
+
+            {/* Contenido por output */}
+            {availableTabs.map((tab) => {
+              if (activeTab !== tab) return null;
+              const cfg = TAB_CONFIG[tab];
+              return (
+                <div key={tab}>
+                  {/* Vista previa del contenido */}
+                  <div
+                    style={{
+                      padding: '20px 22px',
+                      fontSize: 14,
+                      lineHeight: 1.75,
+                      color: '#4A3728',
+                      whiteSpace: 'pre-wrap',
+                      maxHeight: 380,
+                      overflowY: 'auto',
+                      borderBottom: '1.5px solid #E8DDD5',
+                      background: '#FDFAF7',
+                    }}
+                  >
+                    {tab === 'excel'
+                      ? '📊 El archivo Excel contiene tablas de datos estructuradas y gráficos generados a partir del análisis. Descárgalo para verlo en Excel.'
+                      : result.analysisText}
+                  </div>
+
+                  {/* Barra de descarga */}
+                  <div
+                    style={{
+                      padding: '16px 22px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: cfg.bg,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: cfg.accent,
+                        fontWeight: 500,
+                      }}
+                    >
+                      Listo para guardar en tu computadora
+                    </span>
+                    <button
+                      onClick={() => handleDownload(tab)}
+                      disabled={!!downloading}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '10px 20px',
+                        borderRadius: 10,
+                        cursor: downloading ? 'not-allowed' : 'pointer',
+                        opacity: downloading && downloading !== tab ? 0.5 : 1,
+                        border: `1.5px solid ${cfg.border}`,
+                        background:
+                          downloading === tab ? cfg.border : '#FFFFFF',
+                        color: cfg.accent,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        transition: 'background 0.15s',
+                      }}
+                    >
+                      {cfg.icon}
+                      {downloading === tab
+                        ? 'Guardando...'
+                        : `Guardar ${cfg.label}`}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        )}
+
+        {/* Fallback si no hay archivos (solo texto) */}
+        {!hasTabs && (
+          <section
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 16,
+              border: '1.5px solid #E8DDD5',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '14px 22px',
+                background: 'linear-gradient(135deg, #F5EDE3, #FDF6F0)',
+                borderBottom: '1px solid #E8DDD5',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 16 }}>📋</span>
+              <h2
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: '#2D1F14',
+                  margin: 0,
+                }}
+              >
+                Resultado del análisis
+              </h2>
+            </div>
+            <div
+              style={{
+                padding: '20px 22px',
+                fontSize: 14,
+                lineHeight: 1.75,
+                color: '#4A3728',
+                whiteSpace: 'pre-wrap',
+              }}
+            >
+              {result.analysisText}
+            </div>
+          </section>
         )}
 
         <button
           onClick={() => navigate('/home')}
-          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: 13,
+            color: '#9A7D6B',
+            fontWeight: 600,
+            padding: '4px 0',
+            alignSelf: 'flex-start',
+          }}
         >
           ← Nuevo análisis
         </button>
       </main>
     </div>
-  )
+  );
 }

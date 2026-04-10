@@ -7,6 +7,7 @@ export function Results() {
     const navigate = useNavigate();
     const [result, setResult] = useState(null);
     const [downloading, setDownloading] = useState(null);
+    const [savedToast, setSavedToast] = useState(null);
     useEffect(() => {
         if (!sessionId)
             return;
@@ -16,13 +17,167 @@ export function Results() {
         if (!sessionId)
             return;
         setDownloading(fileType);
-        await window.electron.saveFile({ sessionId, fileType });
+        const response = await window.electron.saveFile({ sessionId, fileType });
         setDownloading(null);
+        if (response?.savedPath) {
+            setSavedToast(fileType);
+            setTimeout(() => setSavedToast(null), 3000);
+        }
     }
     if (!result) {
-        return (_jsx("div", { className: "min-h-screen flex items-center justify-center", children: _jsx("div", { className: "animate-spin rounded-full h-8 w-8 border-b-2 border-primary" }) }));
+        return (_jsx("div", { style: {
+                minHeight: '100vh',
+                background: '#FAF7F2',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }, children: _jsx("div", { style: {
+                    width: 36,
+                    height: 36,
+                    borderRadius: '50%',
+                    border: '3px solid #E8DDD5',
+                    borderTopColor: '#8B6145',
+                    animation: 'spin 0.8s linear infinite',
+                } }) }));
     }
-    const hasWord = result.outputFiles.some((f) => f.type === 'word');
-    const hasPptx = result.outputFiles.some((f) => f.type === 'pptx');
-    return (_jsxs("div", { className: "min-h-screen bg-slate-50 flex flex-col", children: [_jsx("header", { className: "bg-white border-b border-slate-200 px-6 py-4", children: _jsx("p", { className: "text-sm text-green-600 font-medium", children: "\u2705 An\u00E1lisis completado" }) }), _jsxs("main", { className: "flex-1 max-w-3xl mx-auto w-full px-6 py-8 space-y-6", children: [_jsxs("div", { className: "bg-white rounded-2xl border border-slate-200 p-6", children: [_jsx("h2", { className: "text-lg font-semibold text-slate-800 mb-4", children: "Resultado del an\u00E1lisis" }), _jsx("div", { className: "prose prose-sm max-w-none text-slate-700 whitespace-pre-wrap", children: result.analysisText })] }), result.warnings.length > 0 && (_jsxs("div", { className: "bg-amber-50 border border-amber-200 rounded-xl p-4", children: [_jsx("p", { className: "text-xs font-medium text-amber-700 mb-1", children: "Notas del procesamiento:" }), result.warnings.map((w, i) => (_jsxs("p", { className: "text-xs text-amber-600", children: ["\u26A0 ", w] }, i)))] })), (hasWord || hasPptx) && (_jsxs("div", { className: "bg-white rounded-2xl border border-slate-200 p-6", children: [_jsx("h3", { className: "text-sm font-semibold text-slate-700 mb-4", children: "Descargar archivos" }), _jsxs("div", { className: "flex gap-3 flex-wrap", children: [hasWord && (_jsxs("button", { onClick: () => handleDownload('word'), disabled: downloading === 'word', className: "flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-5 py-3 text-sm font-medium hover:bg-blue-100 disabled:opacity-50 transition-colors", children: ["\uD83D\uDCC4 ", downloading === 'word' ? 'Guardando...' : 'Informe Word'] })), hasPptx && (_jsxs("button", { onClick: () => handleDownload('pptx'), disabled: downloading === 'pptx', className: "flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 rounded-xl px-5 py-3 text-sm font-medium hover:bg-orange-100 disabled:opacity-50 transition-colors", children: ["\uD83D\uDCCA ", downloading === 'pptx' ? 'Guardando...' : 'PowerPoint'] }))] })] })), _jsx("button", { onClick: () => navigate('/home'), className: "text-sm text-slate-500 hover:text-slate-700 transition-colors", children: "\u2190 Nuevo an\u00E1lisis" })] })] }));
+    const outputFiles = result.outputFiles ?? [];
+    const hasWord = outputFiles.some((f) => f.type === 'word');
+    const hasPptx = outputFiles.some((f) => f.type === 'pptx');
+    return (_jsxs("div", { style: {
+            minHeight: '100vh',
+            background: '#FAF7F2',
+            display: 'flex',
+            flexDirection: 'column',
+        }, children: [_jsxs("header", { style: {
+                    background: 'linear-gradient(135deg, #5C4033, #8B6145)',
+                    padding: '14px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                }, children: [_jsx("div", { style: {
+                            width: 28,
+                            height: 28,
+                            borderRadius: 8,
+                            background: 'rgba(255,255,255,0.15)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 14,
+                        }, children: "\u2705" }), _jsx("span", { style: { color: '#F5EDE3', fontWeight: 700, fontSize: 15 }, children: "An\u00E1lisis completado" })] }), _jsxs("main", { style: {
+                    flex: 1,
+                    maxWidth: 720,
+                    width: '100%',
+                    margin: '0 auto',
+                    padding: '32px 24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 20,
+                }, children: [_jsxs("section", { style: {
+                            background: '#FFFFFF',
+                            borderRadius: 16,
+                            border: '1.5px solid #E8DDD5',
+                            overflow: 'hidden',
+                        }, children: [_jsxs("div", { style: {
+                                    padding: '14px 22px',
+                                    background: 'linear-gradient(135deg, #F5EDE3, #FDF6F0)',
+                                    borderBottom: '1px solid #E8DDD5',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                }, children: [_jsx("span", { style: { fontSize: 16 }, children: "\uD83D\uDCCB" }), _jsx("h2", { style: {
+                                            fontSize: 14,
+                                            fontWeight: 700,
+                                            color: '#2D1F14',
+                                            margin: 0,
+                                        }, children: "Resultado del an\u00E1lisis" })] }), _jsx("div", { style: {
+                                    padding: '20px 22px',
+                                    fontSize: 14,
+                                    lineHeight: 1.75,
+                                    color: '#4A3728',
+                                    whiteSpace: 'pre-wrap',
+                                }, children: result.analysisText })] }), result.warnings.length > 0 && (_jsxs("section", { style: {
+                            background: '#FFFBEB',
+                            border: '1px solid #FDE68A',
+                            borderRadius: 12,
+                            padding: '12px 16px',
+                        }, children: [_jsx("p", { style: {
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    color: '#92400E',
+                                    marginBottom: 6,
+                                }, children: "Notas del procesamiento:" }), result.warnings.map((w, i) => (_jsxs("p", { style: { fontSize: 11, color: '#B45309', margin: '3px 0' }, children: ["\u26A0 ", w] }, i)))] })), (hasWord || hasPptx) && (_jsxs("section", { style: {
+                            background: '#FFFFFF',
+                            borderRadius: 16,
+                            border: '1.5px solid #E8DDD5',
+                            padding: '22px 22px',
+                        }, children: [_jsx("h3", { style: {
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    color: '#2D1F14',
+                                    marginBottom: 16,
+                                }, children: "Descargar archivos generados" }), _jsxs("div", { style: {
+                                    display: 'flex',
+                                    gap: 14,
+                                    flexWrap: 'wrap',
+                                    alignItems: 'flex-start',
+                                }, children: [hasWord && (_jsxs("div", { style: { display: 'flex', flexDirection: 'column', gap: 8 }, children: [_jsxs("button", { onClick: () => handleDownload('word'), disabled: !!downloading, style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 10,
+                                                    padding: '13px 22px',
+                                                    borderRadius: 12,
+                                                    cursor: downloading ? 'not-allowed' : 'pointer',
+                                                    opacity: downloading && downloading !== 'word' ? 0.5 : 1,
+                                                    border: '1.5px solid #D4C4B8',
+                                                    background: '#FDF6F0',
+                                                    color: '#5C4033',
+                                                    fontSize: 13,
+                                                    fontWeight: 600,
+                                                    transition: 'background 0.15s',
+                                                }, children: [_jsx("span", { style: { fontSize: 20 }, children: "\uD83D\uDCC4" }), downloading === 'word' ? 'Guardando...' : 'Informe Word'] }), savedToast === 'word' && (_jsx("div", { style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 6,
+                                                    padding: '7px 14px',
+                                                    borderRadius: 8,
+                                                    background: '#E8F5E2',
+                                                    border: '1px solid #A8C89A',
+                                                    color: '#4A3728',
+                                                    fontSize: 12,
+                                                    fontWeight: 600,
+                                                }, children: "\u2713 Guardado correctamente" }))] })), hasPptx && (_jsxs("div", { style: { display: 'flex', flexDirection: 'column', gap: 8 }, children: [_jsxs("button", { onClick: () => handleDownload('pptx'), disabled: !!downloading, style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 10,
+                                                    padding: '13px 22px',
+                                                    borderRadius: 12,
+                                                    cursor: downloading ? 'not-allowed' : 'pointer',
+                                                    opacity: downloading && downloading !== 'pptx' ? 0.5 : 1,
+                                                    border: '1.5px solid #D4C4B8',
+                                                    background: '#F5EDE3',
+                                                    color: '#4A3728',
+                                                    fontSize: 13,
+                                                    fontWeight: 600,
+                                                    transition: 'background 0.15s',
+                                                }, children: [_jsx("span", { style: { fontSize: 20 }, children: "\uD83D\uDCCA" }), downloading === 'pptx' ? 'Guardando...' : 'PowerPoint'] }), savedToast === 'pptx' && (_jsx("div", { style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 6,
+                                                    padding: '7px 14px',
+                                                    borderRadius: 8,
+                                                    background: '#E8F5E2',
+                                                    border: '1px solid #A8C89A',
+                                                    color: '#4A3728',
+                                                    fontSize: 12,
+                                                    fontWeight: 600,
+                                                }, children: "\u2713 Guardado correctamente" }))] }))] })] })), _jsx("button", { onClick: () => navigate('/home'), style: {
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                            color: '#9A7D6B',
+                            fontWeight: 600,
+                            padding: '4px 0',
+                            alignSelf: 'flex-start',
+                        }, children: "\u2190 Nuevo an\u00E1lisis" })] })] }));
 }

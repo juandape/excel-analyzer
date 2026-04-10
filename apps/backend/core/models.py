@@ -14,7 +14,9 @@ class FileType(str, Enum):
 class OutputFormat(str, Enum):
     WORD = "word"
     PPTX = "pptx"
+    EXCEL = "excel"
     BOTH = "both"
+    ALL = "all"
 
 
 @dataclass

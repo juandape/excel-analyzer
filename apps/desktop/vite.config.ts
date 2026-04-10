@@ -18,7 +18,7 @@ export default defineConfig({
             outDir: 'dist-electron',
             sourcemap: process.env.NODE_ENV === 'development',
             rollupOptions: {
-              external: ['keytar', 'electron'],
+              external: ['electron'],
             },
           },
         },
@@ -34,7 +34,7 @@ export default defineConfig({
             outDir: 'dist-electron',
             sourcemap: process.env.NODE_ENV === 'development',
             rollupOptions: {
-              external: ['keytar', 'electron'],
+              external: ['electron'],
             },
           },
         },
@@ -44,6 +44,13 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+    },
+  },
+  server: {
+    headers: {
+      // Desactivar todo tipo de caché HTTP en dev para que Electron
+      // siempre obtenga el código más reciente sin 304s
+      'Cache-Control': 'no-store',
     },
   },
 });

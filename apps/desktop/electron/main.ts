@@ -2,7 +2,7 @@
  * Proceso principal de Electron.
  * Es el único que conoce el puerto del backend y gestiona el subproceso Python.
  */
-import { app, BrowserWindow, dialog, shell } from 'electron';
+import { app, BrowserWindow, dialog, shell, ipcMain } from 'electron';
 import { join } from 'path';
 import { spawn, ChildProcess } from 'child_process';
 import { chmodSync, existsSync } from 'fs';
@@ -110,20 +110,45 @@ function createWindow(): void {
       contextIsolation: true,
       sandbox: true,
       preload: join(__dirname, 'preload.js'),
-      webSecurity: true,
+      webSecurity: app.isPackaged,
       allowRunningInsecureContent: false,
     },
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    show: false,
+    show: true,
   });
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow?.show();
-  });
+  // Inyectar headers CORS en respuestas del backend para que EventSource funcione
+  // tanto en dev (localhost:5173) como en prod (file://)
+  mainWindow.webContents.session.webRequest.onHeadersReceived(
+    { urls: [`http://127.0.0.1:*/*`] },
+    (details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Access-Control-Allow-Origin': ['*'],
+          'Access-Control-Allow-Headers': ['*'],
+        },
+      });
+    },
+  );
 
   if (!app.isPackaged) {
-    mainWindow.loadURL('http://localhost:5173');
+    // vite-plugin-electron inyecta VITE_DEV_SERVER_URL con el puerto real (puede ser 5173, 5174, etc.)
+    const devURL = process.env.VITE_DEV_SERVER_URL ?? 'http://localhost:5173';
+    log.info(`Cargando renderer desde: ${devURL}`);
+    mainWindow.loadURL(devURL);
     mainWindow.webContents.openDevTools();
+
+    // En dev: Cmd+R / F5 hace hard-reload ignorando caché
+    mainWindow.webContents.on('before-input-event', (_, input) => {
+      if (
+        input.type === 'keyDown' &&
+        (input.key === 'F5' ||
+          (input.key === 'r' && (input.meta || input.control)))
+      ) {
+        mainWindow?.webContents.reloadIgnoringCache();
+      }
+    });
   } else {
     mainWindow.loadFile(join(__dirname, '../dist/index.html'));
   }
@@ -145,8 +170,43 @@ app.whenReady().then(async () => {
   // Registrar todos los handlers IPC, pasando el puerto del backend
   registerFileHandlers(backendPort);
   registerConfigHandlers(backendPort);
-  registerAnalysisHandlers(backendPort, mainWindow);
+  registerAnalysisHandlers(backendPort);
   registerExportHandlers(backendPort);
+
+  // Exponer el puerto del backend al renderer para que use EventSource directamente
+  ipcMain.handle('backend:port', () => backendPort);
+
+  // Polling de estado del análisis
+  ipcMain.handle('analysis:status', async (_, sessionId: string) => {
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:${backendPort}/analysis/status/${sessionId}`,
+      );
+      if (!res.ok) {
+        log.warn(
+          `[analysis:status] HTTP ${res.status} para sesión ${sessionId}`,
+        );
+        return {
+          stage: 'error',
+          percentage: 0,
+          message: `Error del servidor (${res.status})`,
+          done: false,
+          error: true,
+        };
+      }
+      return res.json();
+    } catch (err) {
+      log.warn('[analysis:status] Backend no responde:', err);
+      // Devolver estado neutro para que el polling reintente
+      return {
+        stage: 'extracting',
+        percentage: 5,
+        message: 'Conectando...',
+        done: false,
+        error: false,
+      };
+    }
+  });
 
   createWindow();
 });

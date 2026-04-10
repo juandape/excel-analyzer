@@ -35,7 +35,14 @@ echo "📦 Verificando dependencias Python..."
 echo "📦 Verificando dependencias Node..."
 cd "$ROOT_DIR" && npm install --silent
 
-# 5. Levantar backend en background con puerto fijo
+# 5. Liberar el puerto si está ocupado por un proceso anterior
+if lsof -ti ":$DEV_PORT" > /dev/null 2>&1; then
+  echo "⚠️  Puerto $DEV_PORT ocupado — liberando proceso anterior..."
+  lsof -ti ":$DEV_PORT" | xargs kill -9 2>/dev/null || true
+  sleep 0.5
+fi
+
+# Levantar backend en background con puerto fijo
 echo ""
 echo "🐍 Iniciando backend Python (puerto $DEV_PORT)..."
 BACKEND_PORT=$DEV_PORT \
@@ -69,5 +76,13 @@ done
 echo ""
 echo "⚡ Iniciando Electron + React (Vite HMR activo)..."
 cd "$DESKTOP_DIR"
+# Eliminar dist/ de producción para que Electron use Vite dev server, nunca el build viejo
+rm -rf dist
+# Liberar puerto 5173 si quedó ocupado por una sesión anterior
+if lsof -ti ":5173" > /dev/null 2>&1; then
+  echo "⚠️  Puerto 5173 ocupado — liberando..."
+  lsof -ti ":5173" | xargs kill -9 2>/dev/null || true
+  sleep 0.5
+fi
 # VITE_BACKEND_PORT se usa para que el renderer sepa el puerto en dev
 VITE_BACKEND_PORT=$DEV_PORT npm run dev

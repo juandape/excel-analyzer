@@ -7,6 +7,7 @@ import type { ExportRequest } from '@excel-analyzer/shared-types';
 const FILE_CONFIG: Record<string, { ext: string; label: string }> = {
   word: { ext: 'docx', label: 'Documento Word' },
   pptx: { ext: 'pptx', label: 'Presentación PowerPoint' },
+  excel: { ext: 'xlsx', label: 'Archivo Excel' },
 };
 
 export function registerExportHandlers(backendPort: number): void {

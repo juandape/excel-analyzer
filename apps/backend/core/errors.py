@@ -13,6 +13,7 @@ class ErrorCode(str, Enum):
     PROCESSING_TIMEOUT = "PROCESSING_TIMEOUT"
     AI_UNAVAILABLE = "AI_UNAVAILABLE"
     AI_RATE_LIMIT = "AI_RATE_LIMIT"
+    AI_QUOTA_EXCEEDED = "AI_QUOTA_EXCEEDED"
     AI_CONTEXT_TOO_LARGE = "AI_CONTEXT_TOO_LARGE"
     INVALID_API_KEY = "INVALID_API_KEY"
     SESSION_NOT_FOUND = "SESSION_NOT_FOUND"
@@ -31,6 +32,7 @@ USER_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.PROCESSING_TIMEOUT: "El procesamiento tardó demasiado. Intenta con un archivo más pequeño.",
     ErrorCode.AI_UNAVAILABLE: "No pudimos conectar con la IA. Verifica tu conexión a internet y vuelve a intentarlo.",
     ErrorCode.AI_RATE_LIMIT: "La IA está ocupada en este momento. Espera unos segundos y vuelve a intentarlo.",
+    ErrorCode.AI_QUOTA_EXCEEDED: "Tu cuenta de OpenAI no tiene crédito disponible. Ve a platform.openai.com/billing para recargar.",
     ErrorCode.AI_CONTEXT_TOO_LARGE: "El archivo tiene demasiados datos para analizarlos de una vez. Intenta con una sección más pequeña.",
     ErrorCode.INVALID_API_KEY: "Tu API key parece inválida. Ve a Configuración para actualizarla.",
     ErrorCode.SESSION_NOT_FOUND: "La sesión de análisis expiró. Inicia un nuevo análisis.",

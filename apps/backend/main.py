@@ -22,20 +22,38 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Excel Analyzer backend iniciado")
+    yield
+    from core.session import cleanup_all_sessions
+    await cleanup_all_sessions()
+    logger.info("Backend detenido — sesiones limpiadas")
+
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Excel Analyzer Backend",
     version="1.0.0",
-    docs_url=None,    # Deshabilitado en producción
+    docs_url=None,
     redoc_url=None,
+    lifespan=lifespan,
 )
 
-# Solo permite requests desde el proceso main de Electron (loopback)
+# Permite requests desde el renderer de Electron (dev y prod)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["null", "http://localhost", "http://127.0.0.1"],
+    allow_origins=[
+        "null",
+        "http://localhost",
+        "http://localhost:5173",
+        "http://127.0.0.1",
+        "http://127.0.0.1:5173",
+    ],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
+    allow_credentials=False,
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
@@ -45,26 +63,13 @@ app.include_router(analysis.router, prefix="/analysis")
 app.include_router(export.router, prefix="/export")
 
 
-@app.on_event("startup")
-async def startup():
-    logger.info("Excel Analyzer backend iniciado")
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    from core.session import cleanup_all_sessions
-    await cleanup_all_sessions()
-    logger.info("Backend detenido — sesiones limpiadas")
-
-
 if __name__ == "__main__":
     host = os.getenv("BACKEND_HOST", "127.0.0.1")
     port = int(os.getenv("BACKEND_PORT", "8765"))
 
     uvicorn.run(
-        "main:app",
+        app,
         host=host,
         port=port,
         log_level=log_level.lower(),
-        reload=os.getenv("DEV_MODE", "false").lower() == "true",
     )

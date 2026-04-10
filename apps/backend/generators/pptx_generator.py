@@ -23,10 +23,11 @@ SLIDE_W = Inches(13.33)
 SLIDE_H = Inches(7.5)
 
 
-def generate_pptx(result: AnalysisResult, session: Session) -> Path:
+def generate_pptx(result: AnalysisResult, session: Session, template_path: str | None = None) -> Path:
     """
     Genera un archivo PPTX a partir del análisis de IA.
     El texto debe contener bloques separados por '---SLIDE---'.
+    Si se proporciona template_path, usa esa plantilla .pptx como base.
     Retorna la ruta del archivo en el directorio de sesión.
     """
     # Extraer la sección de slides si existe el separador ===SLIDES===
@@ -39,7 +40,24 @@ def generate_pptx(result: AnalysisResult, session: Session) -> Path:
         # Si no hay bloques estructurados, generar slides desde el Markdown
         slide_blocks = _fallback_parse_markdown(raw)
 
-    prs = Presentation()
+    # Usar plantilla personalizada si se proporcionó y existe
+    if template_path:
+        try:
+            prs = Presentation(template_path)
+            # Eliminar todas las slides existentes de la plantilla preservando el master/layouts
+            from pptx.oxml.ns import qn
+            sldIdLst = prs.slides._sldIdLst
+            for sldId in list(sldIdLst):
+                r_id = sldId.get(qn('r:id'))
+                prs.part.drop_rel(r_id)
+                sldIdLst.remove(sldId)
+            logger.info("Usando plantilla personalizada: %s", template_path)
+        except Exception as exc:
+            logger.warning("No se pudo cargar la plantilla '%s': %s — usando plantilla vacía", template_path, exc)
+            prs = Presentation()
+    else:
+        prs = Presentation()
+
     prs.slide_width = SLIDE_W
     prs.slide_height = SLIDE_H
 
@@ -63,9 +81,18 @@ def generate_pptx(result: AnalysisResult, session: Session) -> Path:
 # ────────────────────────────────────────────────────────────────────────────
 
 def _parse_slide_blocks(text: str) -> list[dict]:
-    """Parsea bloques delimitados por ---SLIDE---."""
+    """Parsea bloques delimitados por ---SLIDE--- o === SLIDE N: titulo ===."""
+    # Normalizar separadores alternativos que algunos LLMs generan
+    # Convierte "=== SLIDE 1: Titulo ===" en "---SLIDE---\nTITULO: Titulo"
+    normalized = re.sub(
+        r"===+\s*SLIDE\s*\d*:?\s*([^=]*?)\s*===+",
+        lambda m: f"---SLIDE---\nTITULO: {m.group(1).strip()}",
+        text,
+        flags=re.IGNORECASE,
+    )
+
     blocks = []
-    raw_blocks = re.split(r"---SLIDE---", text, flags=re.IGNORECASE)
+    raw_blocks = re.split(r"---SLIDE---", normalized, flags=re.IGNORECASE)
     for raw in raw_blocks:
         raw = raw.strip()
         if not raw:
@@ -78,7 +105,9 @@ def _parse_slide_blocks(text: str) -> list[dict]:
             elif line.upper().startswith("TITULO:"):
                 block["titulo"] = line.split(":", 1)[1].strip()
             elif line.startswith("- ") or line.startswith("* "):
-                block["bullets"].append(line[2:].strip())
+                # Limpiar markdown bold (**texto**) de los bullets
+                bullet = re.sub(r"\*\*(.+?)\*\*", r"\1", line[2:].strip())
+                block["bullets"].append(bullet)
         if block["titulo"] or block["bullets"]:
             blocks.append(block)
     return blocks

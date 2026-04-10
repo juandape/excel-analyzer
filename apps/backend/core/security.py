@@ -4,7 +4,7 @@ from pathlib import Path
 
 from core.errors import AppError, ErrorCode
 
-MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024  # 100 MB
+MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024  # 500 MB
 
 ALLOWED_EXTENSIONS = {
     ".xlsx", ".xls", ".csv",   # Excel
