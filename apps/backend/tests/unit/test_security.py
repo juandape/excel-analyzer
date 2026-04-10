@@ -1,6 +1,7 @@
 """Tests de seguridad — validación de rutas de archivo."""
 
 import pytest
+
 from core.errors import AppError, ErrorCode
 from core.security import validate_file_path
 

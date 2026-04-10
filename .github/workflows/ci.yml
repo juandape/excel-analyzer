@@ -27,7 +27,7 @@ jobs:
       - name: Linting (ruff)
         run: |
           cd apps/backend
-          ruff check .
+          ruff check . --config ../../pyproject.toml
 
       - name: Tests con cobertura
         run: |

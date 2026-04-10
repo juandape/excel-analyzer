@@ -3,11 +3,12 @@ import logging
 import re
 from pathlib import Path
 
-from core.models import AnalysisResult
-from core.session import Session
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, RGBColor
+
+from core.models import AnalysisResult
+from core.session import Session
 
 logger = logging.getLogger(__name__)
 

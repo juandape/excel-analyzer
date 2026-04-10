@@ -9,10 +9,11 @@ import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
-from api.routes import analysis, config, export, health
-from core.session import cleanup_all_sessions
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from api.routes import analysis, config, export, health
+from core.session import cleanup_all_sessions
 
 # ── Logging ──────────────────────────────────────────────────────────────────
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()

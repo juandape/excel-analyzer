@@ -5,6 +5,7 @@ from pathlib import Path
 
 import fitz  # PyMuPDF
 import pdfplumber
+
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, TableData
 from core.session import Session

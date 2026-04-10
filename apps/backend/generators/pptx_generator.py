@@ -3,13 +3,14 @@ import logging
 import re
 from pathlib import Path
 
-from core.models import AnalysisResult
-from core.session import Session
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Inches, Pt
+
+from core.models import AnalysisResult
+from core.session import Session
 
 logger = logging.getLogger(__name__)
 

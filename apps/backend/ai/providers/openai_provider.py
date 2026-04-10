@@ -1,11 +1,12 @@
 """Proveedor OpenAI (gpt-4o)."""
 import logging
 
+from openai import APITimeoutError, AuthenticationError, OpenAI, RateLimitError
+
 from ai.client import AIClient
 from ai.prompts.system import OUTPUT_INSTRUCTIONS, SYSTEM_PROMPT, WARNINGS_ADDENDUM
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, OutputFormat
-from openai import APITimeoutError, AuthenticationError, OpenAI, RateLimitError
 
 logger = logging.getLogger(__name__)
 

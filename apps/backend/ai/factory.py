@@ -5,6 +5,7 @@ El resto del sistema nunca sabe qué proveedor está activo.
 import logging
 
 import keyring
+
 from ai.client import AIClient
 from core.errors import AppError, ErrorCode
 

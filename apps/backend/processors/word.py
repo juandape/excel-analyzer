@@ -3,10 +3,11 @@ import hashlib
 import logging
 from pathlib import Path
 
+from docx import Document
+
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, TableData
 from core.session import Session
-from docx import Document
 
 logger = logging.getLogger(__name__)
 
