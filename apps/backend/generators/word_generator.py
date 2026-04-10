@@ -120,7 +120,7 @@ def _add_markdown_table(doc: Document, first_row_line: str, full_text: str) -> N
         return
 
     # Filtrar la línea separadora (---|---...)
-    rows = [l for l in table_lines if not re.match(r"^\|[-| :]+\|$", l)]
+    rows = [line for line in table_lines if not re.match(r"^\|[-| :]+\|$", line)]
     if not rows:
         return
 

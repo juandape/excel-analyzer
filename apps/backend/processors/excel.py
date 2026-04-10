@@ -7,7 +7,7 @@ from pathlib import Path
 import openpyxl
 import pandas as pd
 import xlrd
-from lxml import etree
+from defusedxml import ElementTree as ET
 
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, TableData
@@ -175,7 +175,7 @@ def _extract_xml_metadata(file_path: Path, metadata: dict, warnings: list) -> No
             # Conexiones externas
             if "xl/connections.xml" in names:
                 with zf.open("xl/connections.xml") as f:
-                    tree = etree.parse(f)
+                    tree = ET.parse(f)
                     conns = tree.findall(".//{*}connection")
                     if conns:
                         conn_names = [c.get("name", "sin nombre") for c in conns[:5]]
@@ -188,7 +188,7 @@ def _extract_xml_metadata(file_path: Path, metadata: dict, warnings: list) -> No
             # Rangos con nombre
             if "xl/workbook.xml" in names:
                 with zf.open("xl/workbook.xml") as f:
-                    tree = etree.parse(f)
+                    tree = ET.parse(f)
                     defined_names = tree.findall(".//{*}definedName")
                     if defined_names:
                         metadata["rangos_nombrados"] = [n.get("name") for n in defined_names[:10]]

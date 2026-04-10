@@ -1,6 +1,4 @@
 """Tests de seguridad — validación de rutas de archivo."""
-import tempfile
-from pathlib import Path
 
 import pytest
 

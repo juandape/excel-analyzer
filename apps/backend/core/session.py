@@ -1,5 +1,4 @@
 """Ciclo de vida de sesiones de análisis y limpieza de archivos temporales."""
-import asyncio
 import hashlib
 import logging
 import shutil

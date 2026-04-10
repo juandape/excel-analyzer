@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 from docx import Document
-from docx.oxml.ns import qn
 
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, TableData

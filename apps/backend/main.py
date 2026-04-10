@@ -6,12 +6,14 @@ exclusivamente via HTTP en loopback (127.0.0.1).
 import logging
 import os
 import sys
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import analysis, config, export, health
+from core.session import cleanup_all_sessions
 
 # ── Logging ──────────────────────────────────────────────────────────────────
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -22,13 +24,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Excel Analyzer backend iniciado")
     yield
-    from core.session import cleanup_all_sessions
     await cleanup_all_sessions()
     logger.info("Backend detenido — sesiones limpiadas")
 

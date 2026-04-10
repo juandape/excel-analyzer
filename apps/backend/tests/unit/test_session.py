@@ -1,9 +1,9 @@
 """Tests del ciclo de vida de sesiones."""
-from pathlib import Path
 
-from core.session import cleanup_session, create_session, get_session
-from core.errors import AppError, ErrorCode
 import pytest
+
+from core.errors import AppError, ErrorCode
+from core.session import cleanup_session, create_session, get_session
 
 
 def test_create_session_creates_temp_dir():

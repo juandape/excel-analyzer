@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
 
-from ai.factory import save_config, create_ai_client
+from ai.factory import create_ai_client, save_config
 from core.errors import AppError
 
 logger = logging.getLogger(__name__)

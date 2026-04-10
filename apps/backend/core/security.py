@@ -1,5 +1,4 @@
 """Validación segura de rutas de archivo."""
-import mimetypes
 from pathlib import Path
 
 from core.errors import AppError, ErrorCode
