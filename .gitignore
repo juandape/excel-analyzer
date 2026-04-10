@@ -61,4 +61,6 @@ htmlcov/
 coverage.xml
 apps/desktop/test-results/
 apps/desktop/playwright-report/
-.github
+# ── Copilot / agentes locales ────────────────────────────────────
+.github/agents/
+.github/copilot-instructions.md
