@@ -1,0 +1,57 @@
+# ── Node / Electron ──────────────────────────────────────────────
+node_modules/
+dist/
+out/
+.vite/
+apps/desktop/release/
+
+# ── Python ───────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+.venv-build/
+*.egg-info/
+/dist/
+/build/
+apps/backend/dist/
+apps/backend/build/
+apps/backend/*.spec.bak
+
+# ── PyInstaller output ───────────────────────────────────────────
+apps/desktop/resources/excel-analyzer-backend/
+apps/backend/.pyinstaller-build/
+
+# ── Archivos temporales de la app ────────────────────────────────
+.analyzer_*/
+*.analyzer_tmp
+
+# ── Entorno y secretos ───────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.p12
+*.pfx
+*.pem
+*.key
+
+# ── IDEs ─────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Logs ─────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+
+# ── Testing / Coverage ───────────────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+apps/desktop/test-results/
+apps/desktop/playwright-report/

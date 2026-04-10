@@ -1,0 +1,5 @@
+# El ejecutable del backend (generado por PyInstaller) va aquí.
+# Ejecuta: ./scripts/build-backend.sh
+# Archivos generados (ignorados por git):
+#   excel-analyzer-backend       (macOS/Linux)
+#   excel-analyzer-backend.exe   (Windows)
