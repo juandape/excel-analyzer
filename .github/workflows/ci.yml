@@ -56,6 +56,9 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Build shared-types
+        run: npm run build --workspace=packages/shared-types
+
       - name: Typecheck
         run: npm run typecheck --workspaces --if-present
 

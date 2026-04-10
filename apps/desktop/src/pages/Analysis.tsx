@@ -45,7 +45,7 @@ export function Analysis() {
         } catch (err) {
           console.warn('[polling] Error al obtener estado:', err);
         }
-        await new Promise((r) => setTimeout(r, 1000));
+        await new Promise<void>((r) => setTimeout(r, 1000));
       }
     }
 
