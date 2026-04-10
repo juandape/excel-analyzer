@@ -5,7 +5,6 @@ from pathlib import Path
 
 import fitz  # PyMuPDF
 import pdfplumber
-
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, TableData
 from core.session import Session
@@ -63,7 +62,7 @@ def _process_native(file_path: Path, session: Session) -> ExtractedContent:
     # Extraer tablas con pdfplumber (mejor para tablas financieras)
     try:
         with pdfplumber.open(str(file_path)) as pdf:
-            for i, page in enumerate(pdf.pages[:pages_to_process]):
+            for _i, page in enumerate(pdf.pages[:pages_to_process]):
                 for t in page.extract_tables() or []:
                     if not t or len(t) < 2:
                         continue
@@ -91,7 +90,6 @@ def _process_scanned(file_path: Path, session: Session) -> ExtractedContent:
     try:
         import pytesseract
         from PIL import Image
-        import io
     except ImportError:
         warnings.append("Tesseract no disponible — no se pudo aplicar OCR al PDF escaneado.")
         return ExtractedContent(
