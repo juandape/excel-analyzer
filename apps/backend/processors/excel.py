@@ -1,17 +1,19 @@
 """Procesador de archivos Excel (.xlsx, .xls, .csv)."""
 import hashlib
 import logging
-import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
 import openpyxl
 import pandas as pd
 import xlrd
+from defusedxml import ElementTree as ET
 
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, TableData
 from core.session import Session
+
+logger = logging.getLogger(__name__)
 
 MAX_ROWS_FULL = 500       # Hojas con más filas se samplearán
 MAX_SHEETS = 10           # Máximo de hojas a procesar
