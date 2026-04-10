@@ -1,7 +1,7 @@
 """Tests para el sistema de errores tipados."""
 import pytest
 
-from core.errors import AppError, ErrorCode, USER_MESSAGES
+from core.errors import USER_MESSAGES, AppError, ErrorCode
 
 
 class TestErrorCode:
