@@ -4,6 +4,12 @@ dist/
 out/
 .vite/
 apps/desktop/release/
+apps/desktop/dist-electron/
+
+# ── Archivos JS transpilados desde TypeScript (no commitear, se generan en build) ──
+apps/desktop/electron/**/*.js
+apps/desktop/electron/**/*.js.map
+apps/desktop/src/**/*.js
 
 # ── Python ───────────────────────────────────────────────────────
 __pycache__/
