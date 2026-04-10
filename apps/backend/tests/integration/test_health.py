@@ -1,7 +1,5 @@
 """Test de health check del servidor."""
-import pytest
 from fastapi.testclient import TestClient
-
 from main import app
 
 client = TestClient(app)

@@ -4,7 +4,7 @@ nunca la implementación de cada proveedor.
 """
 from abc import ABC, abstractmethod
 
-from core.models import AnalysisResult, ExtractedContent, OutputFormat
+from core.models import ExtractedContent, OutputFormat
 
 
 class AIClient(ABC):

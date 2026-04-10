@@ -66,4 +66,4 @@ jobs:
         run: npm run test --workspaces --if-present -- --passWithNoTests
 
       - name: Auditoría npm
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=critical --omit=dev

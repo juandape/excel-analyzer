@@ -3,12 +3,11 @@ import logging
 import re
 from pathlib import Path
 
+from core.models import AnalysisResult
+from core.session import Session
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, RGBColor
-
-from core.models import AnalysisResult
-from core.session import Session
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +119,7 @@ def _add_markdown_table(doc: Document, first_row_line: str, full_text: str) -> N
         return
 
     # Filtrar la línea separadora (---|---...)
-    rows = [l for l in table_lines if not re.match(r"^\|[-| :]+\|$", l)]
+    rows = [line for line in table_lines if not re.match(r"^\|[-| :]+\|$", line)]
     if not rows:
         return
 

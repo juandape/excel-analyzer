@@ -4,11 +4,10 @@ import logging
 from pathlib import Path
 
 import pytesseract
-from PIL import Image, ImageFilter
-
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, ImageData
 from core.session import Session
+from PIL import Image, ImageFilter
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,6 @@
 import logging
 
 import requests
-
 from ai.client import AIClient
 from ai.providers.openai_provider import _build_messages
 from core.errors import AppError, ErrorCode

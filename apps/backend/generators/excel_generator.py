@@ -4,12 +4,11 @@ import re
 from pathlib import Path
 
 import openpyxl
-from openpyxl.chart import BarChart, Reference
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
-
 from core.models import AnalysisResult
 from core.session import Session
+from openpyxl.chart import BarChart, Reference
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
 
 logger = logging.getLogger(__name__)
 

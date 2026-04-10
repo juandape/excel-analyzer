@@ -1,11 +1,11 @@
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType
 from core.security import validate_file_path
+from core.session import Session
 from processors.excel import process_excel
 from processors.image import process_image
 from processors.pdf import process_pdf
 from processors.word import process_word
-from core.session import Session
 
 EXTENSION_MAP = {
     ".xlsx": FileType.EXCEL,

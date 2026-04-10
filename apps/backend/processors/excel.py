@@ -7,11 +7,10 @@ from pathlib import Path
 import openpyxl
 import pandas as pd
 import xlrd
-from lxml import etree
-
 from core.errors import AppError, ErrorCode
 from core.models import ExtractedContent, FileType, TableData
 from core.session import Session
+from lxml import etree
 
 logger = logging.getLogger(__name__)
 

@@ -1,11 +1,10 @@
 """POST /config — Guarda la configuración de IA en el keychain."""
 import logging
 
+from ai.factory import create_ai_client, save_config
+from core.errors import AppError
 from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
-
-from ai.factory import save_config, create_ai_client
-from core.errors import AppError
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

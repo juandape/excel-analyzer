@@ -6,20 +6,19 @@ GET  /analysis/result/{session_id} — Resultado final.
 import asyncio
 import json
 import logging
-from typing import AsyncGenerator
-
-from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, field_validator
+from collections.abc import AsyncGenerator
 
 from ai.factory import create_ai_client
 from core.errors import AppError, ErrorCode
 from core.models import AnalysisResult, OutputFormat
-from core.session import Session, cleanup_session, create_session, get_session
+from core.session import Session, create_session, get_session
+from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from generators.excel_generator import generate_excel
 from generators.pptx_generator import generate_pptx
 from generators.word_generator import generate_word
 from processors.dispatcher import dispatch
+from pydantic import BaseModel, field_validator
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
