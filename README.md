@@ -6,10 +6,10 @@
 
 ## Descargas
 
-| Plataforma | Descarga |
-|---|---|
-| **macOS** (Apple Silicon / Intel) | [⬇ Descargar .dmg](../../releases/latest/download/Excel.Analyzer.dmg) |
-| **Windows** (64-bit) | [⬇ Descargar .exe](../../releases/latest/download/Excel.Analyzer.Setup.exe) |
+| Plataforma                        | Descarga                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| **macOS** (Apple Silicon / Intel) | [⬇ Descargar .dmg](../../releases/latest/download/Excel.Analyzer.dmg)       |
+| **Windows** (64-bit)              | [⬇ Descargar .exe](../../releases/latest/download/Excel.Analyzer.Setup.exe) |
 
 > Las versiones se publican automáticamente en la sección [Releases](../../releases) al hacer push a `main`.
 
@@ -29,17 +29,17 @@
 
 ## Capturas de pantalla
 
-> *(próximamente)*
+> _(próximamente)_
 
 ---
 
 ## Proveedores de IA soportados
 
-| Proveedor | Modelos | Requiere API Key |
-|---|---|---|
-| **OpenAI** | GPT-4o, GPT-4-turbo, GPT-3.5-turbo | Sí |
-| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Haiku | Sí |
-| **Ollama** (local) | llama3, mistral, gemma3, etc. | No |
+| Proveedor          | Modelos                            | Requiere API Key |
+| ------------------ | ---------------------------------- | ---------------- |
+| **OpenAI**         | GPT-4o, GPT-4-turbo, GPT-3.5-turbo | Sí               |
+| **Anthropic**      | Claude 3.5 Sonnet, Claude 3 Haiku  | Sí               |
+| **Ollama** (local) | llama3, mistral, gemma3, etc.      | No               |
 
 ---
 
@@ -124,11 +124,13 @@ excel-analyzer/
 ## Stack tecnológico
 
 **Frontend / Desktop**
+
 - [Electron](https://www.electronjs.org/) 32
 - [React](https://react.dev/) 18 + [TypeScript](https://www.typescriptlang.org/) 5
 - [Vite](https://vitejs.dev/) 5 + vite-plugin-electron
 
 **Backend**
+
 - [FastAPI](https://fastapi.tiangolo.com/) + [Uvicorn](https://www.uvicorn.org/)
 - [python-pptx](https://python-pptx.readthedocs.io/) — generación PowerPoint
 - [python-docx](https://python-docx.readthedocs.io/) — generación Word
