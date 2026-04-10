@@ -36,6 +36,7 @@ jobs:
         env:
           AI_PROVIDER: mock
           BACKEND_PORT: '8765'
+          PYTHONPATH: ${{ github.workspace }}/apps/backend
 
       - name: Auditoría de dependencias
         run: |
