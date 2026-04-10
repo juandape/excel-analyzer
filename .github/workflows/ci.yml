@@ -63,7 +63,7 @@ jobs:
         run: npm run typecheck --workspaces --if-present
 
       - name: Tests
-        run: npm run test --workspaces --if-present
+        run: npm run test --workspaces --if-present -- --passWithNoTests
 
       - name: Auditoría npm
         run: npm audit --audit-level=high

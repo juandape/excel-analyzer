@@ -14,8 +14,11 @@ from pydantic import BaseModel, field_validator
 
 from ai.factory import create_ai_client
 from core.errors import AppError, ErrorCode
-from core.models import OutputFormat
+from core.models import AnalysisResult, OutputFormat
 from core.session import Session, cleanup_session, create_session, get_session
+from generators.excel_generator import generate_excel
+from generators.pptx_generator import generate_pptx
+from generators.word_generator import generate_word
 from processors.dispatcher import dispatch
 
 logger = logging.getLogger(__name__)
@@ -216,7 +219,6 @@ async def _run_pipeline(session: Session, request: AnalyzeRequest, queue: asynci
 
         await _emit(queue, session.session_id, "generating", 80, "Generando archivos...")
 
-        from core.models import AnalysisResult
         output_files: dict = {}
         all_warnings = [w for c in contents for w in c.extraction_warnings]
 
@@ -226,7 +228,6 @@ async def _run_pipeline(session: Session, request: AnalyzeRequest, queue: asynci
                 output_files={}, warnings=all_warnings,
             )
             try:
-                from generators.word_generator import generate_word
                 output_files["word"] = await asyncio.to_thread(generate_word, provisional_word, session)
             except Exception as e:
                 logger.warning("Error generando Word: %s", type(e).__name__)
@@ -238,7 +239,6 @@ async def _run_pipeline(session: Session, request: AnalyzeRequest, queue: asynci
                 output_files={}, warnings=all_warnings,
             )
             try:
-                from generators.pptx_generator import generate_pptx
                 output_files["pptx"] = await asyncio.to_thread(
                     generate_pptx, provisional_pptx, session, request.pptx_template_path
                 )
@@ -252,7 +252,6 @@ async def _run_pipeline(session: Session, request: AnalyzeRequest, queue: asynci
                 output_files={}, warnings=all_warnings,
             )
             try:
-                from generators.excel_generator import generate_excel
                 output_files["excel"] = await asyncio.to_thread(generate_excel, provisional_excel, session)
             except Exception as e:
                 logger.warning("Error generando Excel: %s", type(e).__name__)

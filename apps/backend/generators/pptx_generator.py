@@ -6,6 +6,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
+from pptx.oxml.ns import qn
 from pptx.util import Inches, Pt
 
 from core.models import AnalysisResult
@@ -45,7 +46,6 @@ def generate_pptx(result: AnalysisResult, session: Session, template_path: str |
         try:
             prs = Presentation(template_path)
             # Eliminar todas las slides existentes de la plantilla preservando el master/layouts
-            from pptx.oxml.ns import qn
             sldIdLst = prs.slides._sldIdLst
             for sldId in list(sldIdLst):
                 r_id = sldId.get(qn('r:id'))
