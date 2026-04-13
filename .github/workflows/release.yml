@@ -24,13 +24,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Instalar 7zip del sistema (macOS)
+        run: brew install p7zip
+
       - name: Instalar dependencias Node
         run: npm install
-
-      - name: Reinstalar 7zip-bin (forzar binarios nativos macOS)
-        run: |
-          rm -rf node_modules/7zip-bin
-          npm install 7zip-bin --no-save
 
       - name: Instalar dependencias Python
         run: |
@@ -54,6 +52,7 @@ jobs:
           npx electron-builder --mac --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USE_SYSTEM_7ZA: 'true'
 
       - name: Subir artefacto macOS
         uses: actions/upload-artifact@v4
@@ -77,14 +76,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Instalar 7zip del sistema (Windows)
+        run: choco install 7zip -y
+
       - name: Instalar dependencias Node
         run: npm install
-
-      - name: Reinstalar 7zip-bin (forzar binarios nativos Windows)
-        shell: bash
-        run: |
-          rm -rf node_modules/7zip-bin
-          npm install 7zip-bin --no-save
 
       - name: Instalar dependencias Python
         run: |
@@ -109,6 +105,7 @@ jobs:
           npx electron-builder --win --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USE_SYSTEM_7ZA: 'true'
 
       - name: Subir artefacto Windows
         uses: actions/upload-artifact@v4
