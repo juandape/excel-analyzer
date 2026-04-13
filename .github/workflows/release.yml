@@ -75,6 +75,9 @@ jobs:
       - name: Instalar dependencias Node
         run: npm ci
 
+      - name: Fix 7zip-bin (Windows)
+        run: npm install 7zip-bin
+
       - name: Instalar dependencias Python
         run: |
           cd apps/backend
