@@ -79,6 +79,14 @@ jobs:
       - name: Crear shim chmod para Windows
         run: echo "@echo off" | Out-File -FilePath "C:\Windows\System32\chmod.cmd" -Encoding ascii
 
+      - name: Parchear builder-util para no llamar chmod en Windows
+        shell: bash
+        run: |
+          sed -i 's/await (0, fs_extra_1\.chmod)(_7zip_bin_1\.path7za, 0o755)/if (process.platform !== "win32") { await (0, fs_extra_1.chmod)(_7zip_bin_1.path7za, 0o755) }/g' node_modules/builder-util/out/7za.js
+          sed -i 's/await (0, fs_extra_1\.chmod)(_7zip_bin_1\.path7x, 0o755)/if (process.platform !== "win32") { await (0, fs_extra_1.chmod)(_7zip_bin_1.path7x, 0o755) }/g' node_modules/builder-util/out/7za.js
+          echo "=== 7za.js parcheado ==="
+          cat node_modules/builder-util/out/7za.js
+
       - name: Instalar dependencias Python
         run: |
           cd apps/backend
