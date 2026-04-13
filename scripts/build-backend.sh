@@ -20,6 +20,12 @@ fi
 PYTHON="$BACKEND_DIR/.venv/bin/python"
 PIP="$BACKEND_DIR/.venv/bin/pip"
 
+# En Windows (Git Bash / MSYS2), el venv usa Scripts\ en lugar de bin/
+if [ ! -f "$PIP" ] && [ -f "$BACKEND_DIR/.venv/Scripts/pip" ]; then
+  PYTHON="$BACKEND_DIR/.venv/Scripts/python"
+  PIP="$BACKEND_DIR/.venv/Scripts/pip"
+fi
+
 echo "📦 Instalando dependencias..."
 "$PIP" install --quiet -r "$BACKEND_DIR/requirements.txt"
 
@@ -35,7 +41,12 @@ cd "$BACKEND_DIR"
 # El resultado es una carpeta excel-analyzer-backend/ con el binario y sus librerías.
 DIST_PARENT="$ROOT_DIR/apps/desktop/resources"
 
-"$BACKEND_DIR/.venv/bin/pyinstaller" \
+PYINSTALLER="$BACKEND_DIR/.venv/bin/pyinstaller"
+if [ ! -f "$PYINSTALLER" ] && [ -f "$BACKEND_DIR/.venv/Scripts/pyinstaller" ]; then
+  PYINSTALLER="$BACKEND_DIR/.venv/Scripts/pyinstaller"
+fi
+
+"$PYINSTALLER" \
   --onedir \
   --name excel-analyzer-backend \
   --distpath "$DIST_PARENT" \
