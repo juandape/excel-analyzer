@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Fix binarios arm64 (electron-builder)
-        run: npm install 7zip-bin app-builder-bin
+        run: find node_modules -name "app-builder_arm64" -o -name "7za" | xargs chmod +x 2>/dev/null || true
 
       - name: Instalar dependencias Python
         run: |
