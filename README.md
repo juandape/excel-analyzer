@@ -29,7 +29,12 @@
 
 ## Capturas de pantalla
 
-> _(próximamente)_
+<img width="1087" height="746" alt="image" src="https://github.com/user-attachments/assets/67b835ac-cc54-4327-894a-c20864255d6a" />
+
+<img width="1087" height="746" alt="image" src="https://github.com/user-attachments/assets/01fc2204-83a5-4cab-a0be-b0fc642b3a4c" />
+
+<img width="1087" height="746" alt="image" src="https://github.com/user-attachments/assets/1faeffed-f7a8-41a8-a327-ee106f2e8204" />
+
 
 ---
 
