@@ -35,6 +35,9 @@ jobs:
       - name: Empaquetar backend (PyInstaller)
         run: bash scripts/build-backend.sh
 
+      - name: Build shared-types
+        run: npm run build --workspace=packages/shared-types
+
       - name: Build app Electron
         run: |
           cd apps/desktop
@@ -80,6 +83,9 @@ jobs:
       - name: Empaquetar backend (PyInstaller)
         shell: bash
         run: bash scripts/build-backend.sh
+
+      - name: Build shared-types
+        run: npm run build --workspace=packages/shared-types
 
       - name: Build app Electron
         run: |
