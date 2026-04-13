@@ -76,7 +76,7 @@ jobs:
         run: npm ci
 
       - name: Fix 7zip-bin (Windows)
-        run: npm install 7zip-bin
+        run: npm install 7zip-bin app-builder-bin
 
       - name: Instalar dependencias Python
         run: |
