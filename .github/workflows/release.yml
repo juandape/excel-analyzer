@@ -27,6 +27,9 @@ jobs:
       - name: Instalar dependencias Node
         run: npm ci
 
+      - name: Fix binarios electron-builder (macOS)
+        run: cd apps/desktop && npm install electron-builder --no-save
+
       - name: Instalar dependencias Python
         run: |
           cd apps/backend
@@ -75,8 +78,8 @@ jobs:
       - name: Instalar dependencias Node
         run: npm ci
 
-      - name: Fix 7zip-bin (Windows)
-        run: npm install 7zip-bin app-builder-bin
+      - name: Fix binarios electron-builder (Windows)
+        run: cd apps/desktop && npm install electron-builder --no-save
 
       - name: Instalar dependencias Python
         run: |
