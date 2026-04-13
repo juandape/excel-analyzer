@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-mac:
     name: Build macOS (.dmg)
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
 
@@ -26,9 +26,6 @@ jobs:
 
       - name: Instalar dependencias Node
         run: npm ci
-
-      - name: Fix binarios arm64 (electron-builder)
-        run: find node_modules -name "app-builder_arm64" -o -name "7za" | xargs chmod +x 2>/dev/null || true
 
       - name: Instalar dependencias Python
         run: |
