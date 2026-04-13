@@ -76,6 +76,9 @@ jobs:
       - name: Instalar dependencias Node
         run: npm ci --ignore-scripts
 
+      - name: Crear shim chmod para Windows
+        run: echo "@echo off" | Out-File -FilePath "C:\Windows\System32\chmod.cmd" -Encoding ascii
+
       - name: Instalar dependencias Python
         run: |
           cd apps/backend
@@ -95,20 +98,6 @@ jobs:
 
       - name: Generar instalador Windows
         run: |
-          Write-Host "=== Diagnóstico 7zip-bin ==="
-          $p = "D:\a\excel-analyzer\excel-analyzer\node_modules\7zip-bin\win\x64\7za.exe"
-          if (Test-Path $p) { Write-Host "OK: $p existe" } else { Write-Host "FALTA: $p" }
-          Write-Host "--- Contenido node_modules\7zip-bin ---"
-          Get-ChildItem -Recurse node_modules\7zip-bin -ErrorAction SilentlyContinue
-          Write-Host "--- where 7z ---"
-          where.exe 7z 2>&1; where.exe 7za 2>&1
-          if (-not (Test-Path $p)) {
-            New-Item -ItemType Directory -Force -Path node_modules\7zip-bin\win\x64
-            $src = where.exe 7z 2>$null | Select-Object -First 1
-            if (-not $src) { $src = "C:\Program Files\7-Zip\7z.exe" }
-            Write-Host "Copiando $src -> $p"
-            Copy-Item $src $p
-          }
           cd apps/desktop
           npx electron-builder --win --publish never
         env:
