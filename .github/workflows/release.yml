@@ -29,11 +29,12 @@ jobs:
 
       - name: Preparar 7zip para electron-builder (macOS)
         run: |
-          brew install p7zip || true
-          mkdir -p node_modules/7zip-bin/mac/arm64
-          BIN=$(find /opt/homebrew/bin /usr/local/bin -maxdepth 1 \( -name "7zz" -o -name "7za" \) 2>/dev/null | head -1)
-          cp "$BIN" node_modules/7zip-bin/mac/arm64/7za
-          chmod +x node_modules/7zip-bin/mac/arm64/7za
+          mkdir -p /tmp/7zip-install
+          cd /tmp/7zip-install && npm install 7zip-bin@5.2.0 --no-workspaces --ignore-scripts=false
+          mkdir -p "$GITHUB_WORKSPACE/node_modules/7zip-bin/mac/arm64"
+          cp /tmp/7zip-install/node_modules/7zip-bin/mac/arm64/7za "$GITHUB_WORKSPACE/node_modules/7zip-bin/mac/arm64/7za"
+          chmod +x "$GITHUB_WORKSPACE/node_modules/7zip-bin/mac/arm64/7za"
+          echo "Binary: $(ls -la $GITHUB_WORKSPACE/node_modules/7zip-bin/mac/arm64/)"
 
       - name: Instalar dependencias Python
         run: |
@@ -84,23 +85,13 @@ jobs:
         run: npm install
 
       - name: Preparar 7zip para electron-builder (Windows)
+        shell: bash
         run: |
-          New-Item -ItemType Directory -Force -Path node_modules\7zip-bin\win\x64
-          $candidates = @(
-            "C:\Program Files\7-Zip\7z.exe",
-            "C:\Program Files\7-Zip\7za.exe",
-            "C:\ProgramData\chocolatey\bin\7za.exe",
-            "C:\ProgramData\chocolatey\bin\7z.exe"
-          )
-          $bin = $null
-          foreach ($c in $candidates) { if (Test-Path $c) { $bin = $c; break } }
-          if (-not $bin) {
-            choco install 7zip -y --no-progress
-            foreach ($c in $candidates) { if (Test-Path $c) { $bin = $c; break } }
-          }
-          if (-not $bin) { $bin = (Get-ChildItem "C:\ProgramData\chocolatey\lib\7zip" -Recurse -Filter "7z*.exe" | Select-Object -First 1).FullName }
-          Write-Host "Usando: $bin"
-          Copy-Item $bin node_modules\7zip-bin\win\x64\7za.exe
+          mkdir -p /tmp/7zip-install
+          cd /tmp/7zip-install && npm install 7zip-bin@5.2.0 --no-workspaces --ignore-scripts=false
+          mkdir -p "$GITHUB_WORKSPACE/node_modules/7zip-bin/win/x64"
+          cp /tmp/7zip-install/node_modules/7zip-bin/win/x64/7za.exe "$GITHUB_WORKSPACE/node_modules/7zip-bin/win/x64/7za.exe"
+          echo "Binary: $(ls -la $GITHUB_WORKSPACE/node_modules/7zip-bin/win/x64/)"
 
       - name: Instalar dependencias Python
         run: |
