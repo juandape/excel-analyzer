@@ -71,13 +71,16 @@ jobs:
           python-version: '3.12'
 
       - name: Instalar dependencias Node
-        run: npm ci
+        run: npm install
 
       - name: Parchear chmod en builder-util (bug en Windows)
         shell: bash
         run: |
           sed -i 's/await (0, fs_extra_1\.chmod)(_7zip_bin_1\.path7za, 0o755)/if (process.platform !== "win32") await (0, fs_extra_1.chmod)(_7zip_bin_1.path7za, 0o755)/g' node_modules/builder-util/out/7za.js
           sed -i 's/await (0, fs_extra_1\.chmod)(_7zip_bin_1\.path7x, 0o755)/if (process.platform !== "win32") await (0, fs_extra_1.chmod)(_7zip_bin_1.path7x, 0o755)/g' node_modules/builder-util/out/7za.js
+          echo "7za.js OK"
+          ls -la node_modules/app-builder-bin/win/x64/ || true
+          ls -la node_modules/builder-util/node_modules/app-builder-bin/win/x64/ || true
 
       - name: Instalar dependencias Python
         run: |
