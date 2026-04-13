@@ -24,16 +24,16 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Instalar 7zip del sistema (macOS)
+      - name: Instalar dependencias Node
+        run: npm install
+
+      - name: Preparar 7zip para electron-builder (macOS)
         run: |
           brew install p7zip || true
           mkdir -p node_modules/7zip-bin/mac/arm64
           BIN=$(find /opt/homebrew/bin /usr/local/bin -maxdepth 1 \( -name "7zz" -o -name "7za" \) 2>/dev/null | head -1)
           cp "$BIN" node_modules/7zip-bin/mac/arm64/7za
           chmod +x node_modules/7zip-bin/mac/arm64/7za
-
-      - name: Instalar dependencias Node
-        run: npm install
 
       - name: Instalar dependencias Python
         run: |
@@ -80,6 +80,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Instalar dependencias Node
+        run: npm install
+
       - name: Preparar 7zip para electron-builder (Windows)
         run: |
           New-Item -ItemType Directory -Force -Path node_modules\7zip-bin\win\x64
@@ -98,9 +101,6 @@ jobs:
           if (-not $bin) { $bin = (Get-ChildItem "C:\ProgramData\chocolatey\lib\7zip" -Recurse -Filter "7z*.exe" | Select-Object -First 1).FullName }
           Write-Host "Usando: $bin"
           Copy-Item $bin node_modules\7zip-bin\win\x64\7za.exe
-
-      - name: Instalar dependencias Node
-        run: npm install
 
       - name: Instalar dependencias Python
         run: |
