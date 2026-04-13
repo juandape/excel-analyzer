@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-mac:
     name: Build macOS (.dmg)
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
 
@@ -25,10 +25,7 @@ jobs:
           python-version: '3.12'
 
       - name: Instalar dependencias Node
-        run: npm ci
-
-      - name: Fix binarios electron-builder (macOS)
-        run: cd apps/desktop && npm install electron-builder --no-save
+        run: npm install
 
       - name: Instalar dependencias Python
         run: |
@@ -76,10 +73,7 @@ jobs:
           python-version: '3.12'
 
       - name: Instalar dependencias Node
-        run: npm ci
-
-      - name: Fix binarios electron-builder (Windows)
-        run: cd apps/desktop && npm install electron-builder --no-save
+        run: npm install
 
       - name: Instalar dependencias Python
         run: |
