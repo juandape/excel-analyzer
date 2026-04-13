@@ -84,7 +84,9 @@ jobs:
         run: |
           choco install 7zip -y
           New-Item -ItemType Directory -Force -Path node_modules\7zip-bin\win\x64
-          Copy-Item "C:\Program Files\7-Zip\7za.exe" node_modules\7zip-bin\win\x64\7za.exe
+          $bin = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib\7zip" -Recurse -Filter "7za.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $bin) { $bin = Get-ChildItem -Path "C:\Program Files\7-Zip" -Filter "7za.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName }
+          Copy-Item $bin node_modules\7zip-bin\win\x64\7za.exe
 
       - name: Instalar dependencias Node
         run: npm install
