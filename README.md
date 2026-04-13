@@ -8,10 +8,10 @@
 
 | Plataforma                        | Descarga                                                                                                         |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **macOS** (Apple Silicon / Intel) | [⬇ Descargar .dmg](https://github.com/juandape/excel-analyzer/releases/latest/download/Excel.Analyzer.dmg)       |
+| **macOS** (Apple Silicon / Intel) | **Próximamente** (pendiente)                                                |
 | **Windows** (64-bit)              | [⬇ Descargar .exe](https://github.com/juandape/excel-analyzer/releases/latest/download/Excel.Analyzer.Setup.exe) |
 
-> Las versiones se publican automáticamente en la sección [Releases](https://github.com/juandape/excel-analyzer/releases) al hacer push a `main`.
+> Las versiones normalmente se publican en la sección [Releases](https://github.com/juandape/excel-analyzer/releases). Actualmente el instalador para **Windows** está disponible; el instalador para **macOS** queda pendiente.
 
 ---
 
