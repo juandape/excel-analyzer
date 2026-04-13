@@ -50,6 +50,7 @@
     ],
     "mac": {
       "category": "public.app-category.business",
+      "artifactName": "Excel.Analyzer.dmg",
       "target": [
         {
           "target": "dmg",
@@ -62,6 +63,7 @@
       "gatekeeperAssess": false
     },
     "win": {
+      "artifactName": "Excel.Analyzer.Setup.exe",
       "target": [
         {
           "target": "nsis",
@@ -74,7 +76,8 @@
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "artifactName": "Excel.Analyzer.Setup.exe"
     },
     "files": [
       "dist/**/*",
