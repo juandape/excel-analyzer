@@ -28,8 +28,8 @@ jobs:
         run: |
           brew install p7zip || true
           mkdir -p node_modules/7zip-bin/mac/arm64
-          7ZA_BIN=$(which 7za 2>/dev/null || which 7zz 2>/dev/null)
-          cp "$7ZA_BIN" node_modules/7zip-bin/mac/arm64/7za
+          BIN=$(find /opt/homebrew/bin /usr/local/bin -maxdepth 1 \( -name "7zz" -o -name "7za" \) 2>/dev/null | head -1)
+          cp "$BIN" node_modules/7zip-bin/mac/arm64/7za
           chmod +x node_modules/7zip-bin/mac/arm64/7za
 
       - name: Instalar dependencias Node
